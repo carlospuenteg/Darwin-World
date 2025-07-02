@@ -206,6 +206,11 @@ class Creature {
         world.stats.totalBirths++;
         world.stats.totalReproductions++;
         
+        // Track mutations
+        if (childGenes.hasMutation) {
+            world.stats.totalMutations++;
+        }
+        
         // Reproduction costs energy (relative to max energy)
         this.energy = parseFloat((this.energy - this.maxEnergy * 0.3).toFixed(2));
         mate.energy = parseFloat((mate.energy - mate.maxEnergy * 0.3).toFixed(2));
@@ -402,19 +407,53 @@ class Creature {
     }
     
     drawTooltip(ctx) {
-        const tooltipX = this.x + this.radius + 10;
-        const tooltipY = this.y - 15;
         const tooltipWidth = 160;
         const tooltipHeight = 55;
         
-        // Tooltip background
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        // Calculate tooltip position, adjusting for canvas boundaries
+        let tooltipX = this.x + this.radius + 10;
+        let tooltipY = this.y - 15;
+        
+        // Get canvas dimensions (assuming standard canvas size)
+        const canvasWidth = ctx.canvas.width;
+        const canvasHeight = ctx.canvas.height;
+        
+        // Adjust position if tooltip would go outside canvas
+        if (tooltipX + tooltipWidth > canvasWidth) {
+            tooltipX = this.x - this.radius - tooltipWidth - 10; // Position to the left
+        }
+        if (tooltipY < 0) {
+            tooltipY = this.y + this.radius + 10; // Position below
+        }
+        if (tooltipY + tooltipHeight > canvasHeight) {
+            tooltipY = this.y - this.radius - tooltipHeight - 10; // Position above
+        }
+        
+        // Save current context settings
+        ctx.save();
+        
+        // Ensure tooltip is drawn above everything else
+        ctx.globalCompositeOperation = 'source-over';
+        
+        // Tooltip background with shadow for better visibility
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
         ctx.strokeStyle = '#3498db';
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.roundRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight, 8);
         ctx.fill();
         ctx.stroke();
+        
+        // Reset shadow for text
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
         
         // Tooltip text
         ctx.fillStyle = '#ffffff';
@@ -430,14 +469,25 @@ class Creature {
         textY += 16;
         ctx.fillText(`Energy: ${this.energy.toFixed(2)}/${this.maxEnergy.toFixed(2)}`, textX, textY);
         
-        // Arrow pointing to creature
-        ctx.beginPath();
-        ctx.moveTo(tooltipX, tooltipY + tooltipHeight / 2);
-        ctx.lineTo(tooltipX - 10, tooltipY + tooltipHeight / 2 - 5);
-        ctx.lineTo(tooltipX - 10, tooltipY + tooltipHeight / 2 + 5);
-        ctx.closePath();
+        // Arrow pointing to creature (adjust direction based on tooltip position)
         ctx.fillStyle = '#3498db';
+        ctx.beginPath();
+        if (tooltipX > this.x) {
+            // Tooltip is to the right, arrow points left
+            ctx.moveTo(tooltipX, tooltipY + tooltipHeight / 2);
+            ctx.lineTo(tooltipX - 10, tooltipY + tooltipHeight / 2 - 5);
+            ctx.lineTo(tooltipX - 10, tooltipY + tooltipHeight / 2 + 5);
+        } else {
+            // Tooltip is to the left, arrow points right
+            ctx.moveTo(tooltipX + tooltipWidth, tooltipY + tooltipHeight / 2);
+            ctx.lineTo(tooltipX + tooltipWidth + 10, tooltipY + tooltipHeight / 2 - 5);
+            ctx.lineTo(tooltipX + tooltipWidth + 10, tooltipY + tooltipHeight / 2 + 5);
+        }
+        ctx.closePath();
         ctx.fill();
+        
+        // Restore context
+        ctx.restore();
     }
     
     isPointInside(x, y) {

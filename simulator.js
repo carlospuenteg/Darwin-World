@@ -41,6 +41,7 @@ function updateStats() {
     document.getElementById('totalReproductions').textContent = world.stats.totalReproductions;
     document.getElementById('totalBirths').textContent = world.stats.totalBirths;
     document.getElementById('totalDeaths').textContent = world.stats.totalDeaths;
+    document.getElementById('totalMutations').textContent = world.stats.totalMutations;
     
     // Average traits
     const avgTraits = world.getAverageTraits();
@@ -75,10 +76,27 @@ function setupMouseInteraction() {
         const mouseX = event.clientX - rect.left;
         const mouseY = event.clientY - rect.top;
         
-        // Check if mouse is over any creature
+        // Check if mouse is over any creature (works even when paused)
         world.creatures.forEach(creature => {
             creature.isHovered = creature.isPointInside(mouseX, mouseY);
         });
+        
+        // Redraw immediately to show tooltips even when paused
+        if (!world.running) {
+            world.draw(ctx);
+        }
+    });
+    
+    canvas.addEventListener('mouseleave', () => {
+        // Clear all hover states when mouse leaves canvas
+        world.creatures.forEach(creature => {
+            creature.isHovered = false;
+        });
+        
+        // Redraw to hide tooltips when paused
+        if (!world.running) {
+            world.draw(ctx);
+        }
     });
 }
 

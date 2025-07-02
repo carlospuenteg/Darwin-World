@@ -10,10 +10,11 @@ class World {
         this.stats = {
             totalReproductions: 0,
             totalBirths: 0,
-            totalDeaths: 0
+            totalDeaths: 0,
+            totalMutations: 0
         };
         
-        this.foodSpawnRate = 0.3; // Food spawns per frame
+        this.foodSpawnRate = 0.6; // Food spawns per frame (doubled from 0.3)
         this.maxFood = 50;
     }
     
@@ -23,7 +24,8 @@ class World {
         this.stats = {
             totalReproductions: 0,
             totalBirths: 0,
-            totalDeaths: 0
+            totalDeaths: 0,
+            totalMutations: 0
         };
         
         // Create initial population - 20 creatures uniformly distributed
