@@ -16,6 +16,7 @@ class World {
         this.foodSpawnRate = 1.0; // Food spawns per frame (will be updated from UI)
         this.maxFood = 50; // Max food (will be updated from UI)
         this.initialCreatures = 20; // Initial creatures (will be updated from UI)
+        this.baseConsumption = 1.0; // Base energy consumption (will be updated from UI)
     }
     
     initialize() {
@@ -77,8 +78,10 @@ class World {
     }
     
     spawnFood() {
-        const x = Math.random() * this.width;
-        const y = Math.random() * this.height;
+        // Spawn food with margin from edges to prevent corner issues
+        const margin = 20; // Pixels from edge
+        const x = margin + Math.random() * (this.width - 2 * margin);
+        const y = margin + Math.random() * (this.height - 2 * margin);
         this.food.push(new Food(x, y));
     }
     

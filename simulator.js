@@ -70,6 +70,7 @@ function resetSimulation() {
     world.initialCreatures = parseInt(document.getElementById('initialCreatures').value);
     world.foodSpawnRate = parseFloat(document.getElementById('foodSpawnRate').value);
     world.maxFood = parseInt(document.getElementById('maxFood').value);
+    world.baseConsumption = parseFloat(document.getElementById('baseConsumption').value);
     
     world.initialize();
     world.draw(ctx);
@@ -111,6 +112,7 @@ function setupMouseInteraction() {
 function applySettings() {
     world.foodSpawnRate = parseFloat(document.getElementById('foodSpawnRate').value);
     world.maxFood = parseInt(document.getElementById('maxFood').value);
+    world.baseConsumption = parseFloat(document.getElementById('baseConsumption').value);
 }
 
 // Initialize when page loads
@@ -127,4 +129,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Connect settings inputs to apply function
     document.getElementById('foodSpawnRate').addEventListener('input', applySettings);
     document.getElementById('maxFood').addEventListener('input', applySettings);
+    document.getElementById('baseConsumption').addEventListener('input', applySettings);
 }); 

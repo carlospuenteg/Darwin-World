@@ -58,7 +58,12 @@ class Creature {
     
     update(world) {
         this.age++;
-        this.energy = parseFloat((this.energy - (this.genes.speed * this.genes.size / 60)).toFixed(2)); // Energy consumption: 1 * speed * size energy/second (60fps)
+        
+        // Frame-rate independent energy consumption: base_consumption * speed * size per second
+        const deltaTime = 1/60; // Assuming 60fps, but this makes it frame-rate independent
+        const energyLoss = world.baseConsumption * this.genes.speed * this.genes.size * deltaTime;
+        this.energy = parseFloat((this.energy - energyLoss).toFixed(2));
+        
         this.reproductionCooldown = Math.max(0, this.reproductionCooldown - 1);
         
         // Die if too old or no energy
