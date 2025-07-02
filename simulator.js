@@ -7,11 +7,7 @@ let animationFrame;
 // Graph variables
 let graphCanvas;
 let graphCtx;
-let geneHistory = {
-    size: [],
-    speed: [],
-    appetite: []
-};
+let geneHistory = []; // Array of {step, size, speed, appetite} objects
 let simulationSteps = 0; // Track simulation steps for graph timing
 
 // Initialize simulation
@@ -28,7 +24,7 @@ function initializeSimulation() {
     world.initialize();
     
     // Reset gene history
-    geneHistory = { size: [], speed: [], appetite: [] };
+    geneHistory = [];
     simulationSteps = 0;
     
     // Draw initial state
@@ -93,15 +89,18 @@ function updateStats() {
     
     // Update gene history for graph (keep full simulation history)
     if (world.creatures.length > 0) {
-        geneHistory.size.push(avgTraits.size);
-        geneHistory.speed.push(avgTraits.speed);
-        geneHistory.appetite.push(avgTraits.appetite);
+        geneHistory.push({
+            step: simulationSteps,
+            size: avgTraits.size,
+            speed: avgTraits.speed,
+            appetite: avgTraits.appetite
+        });
     }
 }
 
 // Update gene evolution graph
 function updateGraph() {
-    if (!graphCtx || geneHistory.size.length === 0) return;
+    if (!graphCtx || geneHistory.length === 0) return;
     
     const width = graphCanvas.width;
     const height = graphCanvas.height;
@@ -124,20 +123,28 @@ function updateGraph() {
         graphCtx.stroke();
     }
     
-    const historyLength = geneHistory.size.length;
+    const historyLength = geneHistory.length;
     if (historyLength < 2) return;
     
-    // Find min/max values for scaling
-    const allValues = [...geneHistory.size, ...geneHistory.speed, ...geneHistory.appetite];
+    // Find min/max values for scaling (Y-axis) and simulation step range (X-axis)
+    const sizeValues = geneHistory.map(h => h.size);
+    const speedValues = geneHistory.map(h => h.speed);
+    const appetiteValues = geneHistory.map(h => h.appetite);
+    const allValues = [...sizeValues, ...speedValues, ...appetiteValues];
     const minVal = Math.min(...allValues);
     const maxVal = Math.max(...allValues);
     const range = maxVal - minVal || 1;
     
+    // Get simulation step range for X-axis
+    const minStep = geneHistory[0].step;
+    const maxStep = geneHistory[historyLength - 1].step;
+    const stepRange = maxStep - minStep || 1;
+    
     // Draw gene lines with padding
     const genes = [
-        { data: geneHistory.size, color: '#e74c3c', name: 'Size' },
-        { data: geneHistory.speed, color: '#3498db', name: 'Speed' }, 
-        { data: geneHistory.appetite, color: '#2ecc71', name: 'Appetite' }
+        { data: sizeValues, color: '#e74c3c', name: 'Size' },
+        { data: speedValues, color: '#3498db', name: 'Speed' }, 
+        { data: appetiteValues, color: '#2ecc71', name: 'Appetite' }
     ];
     
     genes.forEach(gene => {
@@ -146,7 +153,9 @@ function updateGraph() {
         graphCtx.beginPath();
         
         for (let i = 0; i < gene.data.length; i++) {
-            const x = padding + (i / (historyLength - 1)) * graphWidth;
+            // Use simulation step for X position instead of array index
+            const currentStep = geneHistory[i].step;
+            const x = padding + ((currentStep - minStep) / stepRange) * graphWidth;
             const normalizedValue = (gene.data[i] - minVal) / range;
             const y = height - padding - (normalizedValue * graphHeight);
             
@@ -161,7 +170,8 @@ function updateGraph() {
         // Draw current value at the end of the line
         if (gene.data.length > 0) {
             const lastValue = gene.data[gene.data.length - 1];
-            const lastX = padding + ((gene.data.length - 1) / (historyLength - 1)) * graphWidth;
+            const lastStep = geneHistory[historyLength - 1].step;
+            const lastX = padding + ((lastStep - minStep) / stepRange) * graphWidth;
             const lastNormalizedValue = (lastValue - minVal) / range;
             const lastY = height - padding - (lastNormalizedValue * graphHeight);
             
@@ -178,7 +188,8 @@ function updateGraph() {
     genes.forEach((gene, index) => {
         if (gene.data.length > 0) {
             const lastValue = gene.data[gene.data.length - 1];
-            const lastX = padding + ((gene.data.length - 1) / (historyLength - 1)) * graphWidth;
+            const lastStep = geneHistory[historyLength - 1].step;
+            const lastX = padding + ((lastStep - minStep) / stepRange) * graphWidth;
             const lastNormalizedValue = (lastValue - minVal) / range;
             let lastY = height - padding - (lastNormalizedValue * graphHeight);
             
@@ -228,13 +239,13 @@ function updateGraph() {
     });
     
     // Update min/max display below the graph
-    if (geneHistory.size.length > 0) {
-        const sizeMin = Math.min(...geneHistory.size).toFixed(2);
-        const sizeMax = Math.max(...geneHistory.size).toFixed(2);
-        const speedMin = Math.min(...geneHistory.speed).toFixed(2);
-        const speedMax = Math.max(...geneHistory.speed).toFixed(2);
-        const appetiteMin = Math.min(...geneHistory.appetite).toFixed(2);
-        const appetiteMax = Math.max(...geneHistory.appetite).toFixed(2);
+    if (geneHistory.length > 0) {
+        const sizeMin = Math.min(...sizeValues).toFixed(2);
+        const sizeMax = Math.max(...sizeValues).toFixed(2);
+        const speedMin = Math.min(...speedValues).toFixed(2);
+        const speedMax = Math.max(...speedValues).toFixed(2);
+        const appetiteMin = Math.min(...appetiteValues).toFixed(2);
+        const appetiteMax = Math.max(...appetiteValues).toFixed(2);
         
         const minMaxDiv = document.getElementById('geneMinMax');
         minMaxDiv.innerHTML = `
@@ -274,7 +285,7 @@ function resetSimulation() {
     world.baseEnergy = parseFloat(document.getElementById('baseEnergy').value);
     
     // Reset gene history
-    geneHistory = { size: [], speed: [], appetite: [] };
+    geneHistory = [];
     simulationSteps = 0;
     
     world.initialize();
