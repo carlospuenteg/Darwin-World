@@ -5,25 +5,23 @@ class Creature {
         this.vx = 0;
         this.vy = 0;
         
-        // Genetic traits (0-1 normalized)
+        // Genetic traits (0.1 to 10)
         if (genes) {
             this.genes = { ...genes };
         } else {
             this.genes = {
-                size: Math.random(),      // 0-1 (affects strength and visibility)
-                speed: Math.random(),     // 0-1 (movement speed)
-                aggression: Math.random() // 0-1 (likelihood to fight)
+                size: 1  // Default starting size is 1
             };
         }
         
         // Derived properties from genes
-        this.radius = 5 + this.genes.size * 15; // 5-20 pixels
-        this.maxSpeed = 0.5 + this.genes.speed * 2; // 0.5-2.5 pixels/frame
-        this.strength = this.genes.size * 100; // Used in combat
+        this.radius = 5 + this.genes.size * 3; // 8-35 pixels (visual size)
+        this.maxSpeed = 1 / this.genes.size; // Speed is inverse of size
+        this.strength = this.genes.size * 50; // Used in combat
         
-        // Life properties
-        this.energy = 100;
-        this.maxEnergy = 100;
+        // Life properties - energy based on size
+        this.maxEnergy = this.genes.size;
+        this.energy = this.maxEnergy;
         this.age = 0;
         this.maxAge = 1000 + Math.random() * 2000;
         this.reproductionCooldown = 0;
@@ -41,20 +39,13 @@ class Creature {
     }
     
     getColor() {
-        // Color based on aggression level
-        const aggression = this.genes.aggression;
-        if (aggression > 0.7) {
-            return '#e74c3c'; // Red - high aggression
-        } else if (aggression > 0.4) {
-            return '#f39c12'; // Orange - medium aggression
-        } else {
-            return '#2ecc71'; // Green - low aggression
-        }
+        // All creatures are red for now
+        return '#e74c3c';
     }
     
     update(world) {
         this.age++;
-        this.energy -= 0.1; // Base energy consumption
+        this.energy -= 0.01 * this.genes.size; // Energy consumption scales with size
         this.reproductionCooldown = Math.max(0, this.reproductionCooldown - 1);
         
         // Die if too old or no energy
@@ -83,15 +74,15 @@ class Creature {
         );
         
         // Prioritize actions based on needs and personality
-        if (this.energy < 30 && nearbyFood.length > 0) {
+        if (this.energy < this.maxEnergy * 0.3 && nearbyFood.length > 0) {
             // Seek food when hungry
             this.state = 'seeking_food';
             this.target = this.findClosest(nearbyFood);
             this.moveToward(this.target);
-        } else if (this.energy > 60 && this.reproductionCooldown <= 0 && nearbyCreatures.length > 0) {
+        } else if (this.energy > this.maxEnergy * 0.6 && this.reproductionCooldown <= 0 && nearbyCreatures.length > 0) {
             // Try to reproduce when well-fed
             const mate = nearbyCreatures.find(c => 
-                c.energy > 60 && c.reproductionCooldown <= 0
+                c.energy > c.maxEnergy * 0.6 && c.reproductionCooldown <= 0
             );
             if (mate) {
                 this.state = 'mating';
@@ -101,8 +92,8 @@ class Creature {
                     this.reproduce(mate, world);
                 }
             }
-        } else if (this.genes.aggression > Math.random() && nearbyCreatures.length > 0) {
-            // Fight based on aggression
+        } else if (Math.random() < 0.1 && nearbyCreatures.length > 0) {
+            // Occasionally fight (reduced aggression for now)
             const enemy = nearbyCreatures[Math.floor(Math.random() * nearbyCreatures.length)];
             this.state = 'fighting';
             this.target = enemy;
@@ -145,8 +136,8 @@ class Creature {
         this.x += this.vx;
         this.y += this.vy;
         
-        // Energy cost for movement
-        const movementCost = Math.sqrt(this.vx * this.vx + this.vy * this.vy) * 0.05;
+        // Energy cost for movement (scales with size)
+        const movementCost = Math.sqrt(this.vx * this.vx + this.vy * this.vy) * 0.01 * this.genes.size;
         this.energy -= movementCost;
         
         // Friction
@@ -201,26 +192,26 @@ class Creature {
         
         if (myPower > enemyPower) {
             // I win - gain energy, enemy loses more
-            this.energy += 10;
-            enemy.energy -= 25;
+            this.energy = Math.min(this.maxEnergy, this.energy + 0.2);
+            enemy.energy -= 0.5;
             enemy.vx += (enemy.x - this.x) * 0.1; // Knockback
             enemy.vy += (enemy.y - this.y) * 0.1;
         } else {
             // Enemy wins
-            this.energy -= 25;
-            enemy.energy += 10;
+            this.energy -= 0.5;
+            enemy.energy = Math.min(enemy.maxEnergy, enemy.energy + 0.2);
             this.vx += (this.x - enemy.x) * 0.1; // Knockback
             this.vy += (this.y - enemy.y) * 0.1;
         }
         
         // Both lose some energy from fighting
-        this.energy -= 5;
-        enemy.energy -= 5;
+        this.energy -= 0.1;
+        enemy.energy -= 0.1;
     }
     
     reproduce(mate, world) {
-        // Both parents need energy
-        if (this.energy < 50 || mate.energy < 50) return;
+        // Both parents need enough energy (relative to their max)
+        if (this.energy < this.maxEnergy * 0.5 || mate.energy < mate.maxEnergy * 0.5) return;
         
         // Create offspring with genetic crossover and mutation
         const childGenes = this.crossoverGenes(mate);
@@ -236,9 +227,9 @@ class Creature {
         world.creatures.push(child);
         world.stats.totalBirths++;
         
-        // Reproduction costs energy and has cooldown
-        this.energy -= 30;
-        mate.energy -= 30;
+        // Reproduction costs energy (relative to max energy)
+        this.energy -= this.maxEnergy * 0.3;
+        mate.energy -= mate.maxEnergy * 0.3;
         this.reproductionCooldown = 200;
         mate.reproductionCooldown = 200;
         
@@ -251,26 +242,22 @@ class Creature {
     crossoverGenes(mate) {
         // Simple genetic crossover - average parents' genes
         return {
-            size: (this.genes.size + mate.genes.size) / 2,
-            speed: (this.genes.speed + mate.genes.speed) / 2,
-            aggression: (this.genes.aggression + mate.genes.aggression) / 2
+            size: (this.genes.size + mate.genes.size) / 2
         };
     }
     
     mutateGenes(genes) {
         const mutationRate = 0.1;
-        const mutationStrength = 0.1;
+        const mutationStrength = 0.5; // Larger mutations for 0.1-10 range
         
-        for (const trait in genes) {
-            if (Math.random() < mutationRate) {
-                genes[trait] += (Math.random() - 0.5) * mutationStrength;
-                genes[trait] = Math.max(0, Math.min(1, genes[trait])); // Keep in 0-1 range
-            }
+        if (Math.random() < mutationRate) {
+            genes.size += (Math.random() - 0.5) * mutationStrength;
+            genes.size = Math.max(0.1, Math.min(10, genes.size)); // Keep in 0.1-10 range
         }
     }
     
     eatFood(food, world) {
-        this.energy = Math.min(this.maxEnergy, this.energy + 25);
+        this.energy = Math.min(this.maxEnergy, this.energy + 0.5); // Smaller energy gain relative to new scale
         world.removeFood(food);
     }
     
@@ -328,18 +315,8 @@ class Creature {
         this.drawEyes(ctx, wiggle);
         
         // Draw size indicator (spikes for large creatures)
-        if (this.genes.size > 0.7) {
+        if (this.genes.size > 3) {
             this.drawSpikes(ctx, wiggle);
-        }
-        
-        // Draw speed indicator (fins/streamlines for fast creatures)
-        if (this.genes.speed > 0.7) {
-            this.drawSpeedLines(ctx, wiggle);
-        }
-        
-        // Draw aggression indicator (teeth/claws for aggressive creatures)
-        if (this.genes.aggression > 0.6) {
-            this.drawAggressionFeatures(ctx, wiggle);
         }
         
         // Energy bar (more stylized)
@@ -429,50 +406,7 @@ class Creature {
         }
     }
     
-    drawSpeedLines(ctx, wiggle) {
-        const lineCount = 3;
-        const lineLength = this.radius * 0.8;
-        
-        ctx.strokeStyle = 'rgba(52, 152, 219, 0.6)';
-        ctx.lineWidth = 2;
-        
-        for (let i = 0; i < lineCount; i++) {
-            const offsetY = (i - 1) * 8;
-            const startX = this.x - this.radius - 5;
-            const startY = this.y + offsetY + wiggle;
-            const endX = startX - lineLength;
-            const endY = startY;
-            
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(endX, endY);
-            ctx.stroke();
-        }
-    }
-    
-    drawAggressionFeatures(ctx, wiggle) {
-        // Draw teeth/fangs
-        const teethCount = 4;
-        const teethSize = this.radius * 0.2;
-        
-        ctx.fillStyle = '#ffffff';
-        ctx.strokeStyle = '#2c3e50';
-        ctx.lineWidth = 1;
-        
-        for (let i = 0; i < teethCount; i++) {
-            const angle = (Math.PI * 0.2) + (i / (teethCount - 1)) * Math.PI * 0.6;
-            const teethX = this.x + Math.cos(angle) * this.radius * 0.6;
-            const teethY = this.y + Math.sin(angle) * this.radius * 0.6 + wiggle;
-            
-            ctx.beginPath();
-            ctx.moveTo(teethX, teethY);
-            ctx.lineTo(teethX - teethSize * 0.5, teethY + teethSize);
-            ctx.lineTo(teethX + teethSize * 0.5, teethY + teethSize);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-        }
-    }
+
     
     drawEnergyBar(ctx) {
         const barWidth = this.radius * 2;
@@ -540,9 +474,9 @@ class Creature {
     
     drawTooltip(ctx) {
         const tooltipX = this.x + this.radius + 10;
-        const tooltipY = this.y - 40;
+        const tooltipY = this.y - 20;
         const tooltipWidth = 160;
-        const tooltipHeight = 85;
+        const tooltipHeight = 70;
         
         // Tooltip background
         ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
@@ -563,13 +497,11 @@ class Creature {
         
         ctx.fillText(`Generation: ${this.generation}`, textX, textY);
         textY += 16;
-        ctx.fillText(`Size: ${(this.genes.size * 100).toFixed(1)}%`, textX, textY);
+        ctx.fillText(`Size: ${this.genes.size.toFixed(1)}`, textX, textY);
         textY += 16;
-        ctx.fillText(`Speed: ${(this.genes.speed * 100).toFixed(1)}%`, textX, textY);
+        ctx.fillText(`Speed: ${this.maxSpeed.toFixed(2)}`, textX, textY);
         textY += 16;
-        ctx.fillText(`Aggression: ${(this.genes.aggression * 100).toFixed(1)}%`, textX, textY);
-        textY += 16;
-        ctx.fillText(`Energy: ${this.energy.toFixed(1)}/${this.maxEnergy}`, textX, textY);
+        ctx.fillText(`Energy: ${this.energy.toFixed(1)}/${this.maxEnergy.toFixed(1)}`, textX, textY);
         
         // Arrow pointing to creature
         ctx.beginPath();
@@ -747,19 +679,15 @@ class World {
     
     getAverageTraits() {
         if (this.creatures.length === 0) {
-            return { size: 0, speed: 0, aggression: 0 };
+            return { size: 0, speed: 0 };
         }
         
-        const totals = this.creatures.reduce((acc, creature) => ({
-            size: acc.size + creature.genes.size,
-            speed: acc.speed + creature.genes.speed,
-            aggression: acc.aggression + creature.genes.aggression
-        }), { size: 0, speed: 0, aggression: 0 });
+        const totalSize = this.creatures.reduce((acc, creature) => acc + creature.genes.size, 0);
+        const totalSpeed = this.creatures.reduce((acc, creature) => acc + creature.maxSpeed, 0);
         
         return {
-            size: totals.size / this.creatures.length,
-            speed: totals.speed / this.creatures.length,
-            aggression: totals.aggression / this.creatures.length
+            size: totalSize / this.creatures.length,
+            speed: totalSpeed / this.creatures.length
         };
     }
     
@@ -903,9 +831,9 @@ function updateStats() {
     
     populationStat.textContent = world.creatures.length;
     generationStat.textContent = world.stats.currentGeneration;
-    avgSizeStat.textContent = (avgTraits.size * 100).toFixed(1) + '%';
-    avgSpeedStat.textContent = (avgTraits.speed * 100).toFixed(1) + '%';
-    avgAggressionStat.textContent = (avgTraits.aggression * 100).toFixed(1) + '%';
+    avgSizeStat.textContent = avgTraits.size.toFixed(1);
+    avgSpeedStat.textContent = avgTraits.speed.toFixed(2);
+    avgAggressionStat.textContent = 'N/A'; // No aggression stat for now
 }
 
 // Initialize the simulation
