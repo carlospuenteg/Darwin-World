@@ -14,9 +14,10 @@ class World {
         };
         
         this.foodSpawnRate = CONFIG.foodSpawnRate; // Food spawns per frame (will be updated from UI)
-        this.maxFood = CONFIG.maxFood; // Max food (will be updated from UI)
+        this.initialFood = CONFIG.initialFood; // Initial food (will be updated from UI)
         this.initialCreatures = CONFIG.initialCreatures; // Initial creatures (will be updated from UI)
         this.baseConsumption = CONFIG.baseConsumption; // Base energy consumption (will be updated from UI)
+        this.gameSpeed = CONFIG.gameSpeed; // Game speed multiplier (will be updated from UI)
     }
     
     initialize() {
@@ -37,7 +38,7 @@ class World {
         }
         
         // Create initial food scattered around
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < this.initialFood; i++) {
             this.spawnFood();
         }
     }
@@ -69,8 +70,8 @@ class World {
             }
         }
         
-        // Spawn new food
-        if (Math.random() < this.foodSpawnRate && this.food.length < this.maxFood) {
+        // Spawn new food (no max limit)
+        if (Math.random() < this.foodSpawnRate) {
             this.spawnFood();
         }
         

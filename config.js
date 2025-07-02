@@ -4,6 +4,7 @@
 const CONFIG = {
     initialCreatures: 30,
     foodSpawnRate: 0.15,
-    maxFood: 100,
-    baseConsumption: 1.0
+    initialFood: 100,
+    baseConsumption: 1.0,
+    gameSpeed: 1.0
 }; 
