@@ -197,33 +197,30 @@
                         <span>Newborn (first 2 sec)</span>
                     </div>
                     <div class="legend-item">
+                        <div class="legend-color" style="background: #3498db;"></div>
+                        <span>Mutant newborn (first 2 sec)</span>
+                    </div>
+                    <div class="legend-item">
                         <div class="legend-color" style="background: #e74c3c;"></div>
                         <span>Adult Creatures</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background: #3498db;"></div>
+                        <div class="legend-color" style="background: #3498db; opacity: 0.7;"></div>
                         <span>Food</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #2c3e50;"></div>
-                        <span>Spikes = Large Size (>3)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #3498db;"></div>
-                        <span>Speed Lines = Fast (>3)</span>
                     </div>
                 </div>
                 
                 <div class="control-group">
                     <h3>ℹ️ Info</h3>
                     <p style="font-size: 0.8em; line-height: 1.4; opacity: 0.8;">
-                        • Starts with 20 creatures<br>
+                        • Starts with 20 creatures (half energy)<br>
                         • No random spawning - when all die, game ends<br>
-                        • Seeks food when energy < 50%<br>
-                        • Mates when energy ≥ 50%<br>
-                        • Max energy = size × 10<br>
-                        • Energy consumption = speed × size per second<br>
-                        • 10% mutation chance per trait (±50%)<br>
+                        • Seeks food when energy ≤ 50%<br>
+                        • Mates when energy > 50%<br>
+                        • Offspring = average of parents' traits<br>
+                        • 10% mutation chance per trait (±20%)<br>
+                        • Mutants are blue for first 2 seconds<br>
+                        • All values have 2 decimal precision<br>
                     </p>
                 </div>
             </div>

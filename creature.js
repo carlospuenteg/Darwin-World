@@ -5,23 +5,28 @@ class Creature {
         this.vx = 0;
         this.vy = 0;
         
-        // Genetic traits (0.1 to 10)
+        // Genetic traits (0.1 to 10) with 2 decimal precision
         if (genes) {
-            this.genes = { ...genes };
+            this.genes = { 
+                size: parseFloat(genes.size.toFixed(2)),
+                speed: parseFloat(genes.speed.toFixed(2))
+            };
+            this.hasMutation = genes.hasMutation || false;
         } else {
             this.genes = {
-                size: 1,  // Default starting size is 1
-                speed: 1  // Default starting speed is 1
+                size: 1.00,  // Default starting size is 1.00
+                speed: 1.00  // Default starting speed is 1.00
             };
+            this.hasMutation = false;
         }
         
         // Derived properties from genes
-        this.radius = 8 + this.genes.size * 4; // Size 1 = 12px (50% bigger), range 8.4-48 pixels
-        this.maxSpeed = this.genes.speed; // Speed trait directly determines movement speed
+        this.radius = parseFloat((8 + this.genes.size * 4).toFixed(2)); // Size 1 = 12px (50% bigger), range 8.4-48 pixels
+        this.maxSpeed = parseFloat(this.genes.speed.toFixed(2)); // Speed trait directly determines movement speed
         
         // Life properties - energy based on size
-        this.maxEnergy = this.genes.size * 10; // initial energy = maximum energy = size * 10
-        this.energy = this.maxEnergy;
+        this.maxEnergy = parseFloat((this.genes.size * 10).toFixed(2)); // maximum energy = size * 10
+        this.energy = this.maxEnergy / 2; // start with exactly half energy
         this.age = 0;
         this.maxAge = 1000 + Math.random() * 2000;
         this.reproductionCooldown = 0;
@@ -40,17 +45,21 @@ class Creature {
     }
     
     getColor() {
-        // Yellow for first 2 seconds of life if born from reproduction, otherwise always red
+        // Color based on age and mutation status for newborns
         const ageInSeconds = (Date.now() - this.birthTime) / 1000;
         if (this.bornFromReproduction && ageInSeconds < 2) {
-            return '#f1c40f'; // Yellow for newborns from reproduction
+            if (this.hasMutation) {
+                return '#3498db'; // Blue for newborns with mutations
+            } else {
+                return '#f1c40f'; // Yellow for normal newborns from reproduction
+            }
         }
         return '#e74c3c'; // Red for adults and randomly spawned creatures
     }
     
     update(world) {
         this.age++;
-        this.energy -= (this.genes.speed * this.genes.size / 60); // Energy consumption: 1 energy/second * speed * size (60fps)
+        this.energy = parseFloat((this.energy - (this.genes.speed * this.genes.size / 60)).toFixed(2)); // Energy consumption: 1 energy/second * speed * size (60fps)
         this.reproductionCooldown = Math.max(0, this.reproductionCooldown - 1);
         
         // Die if too old or no energy
@@ -71,8 +80,8 @@ class Creature {
     
     behave(world) {
         // Simple two-state behavior based on energy level
-        if (this.energy < this.maxEnergy * 0.5) {
-            // Seek food when energy is less than half
+        if (this.energy <= this.maxEnergy * 0.5) {
+            // Seek food when energy is half or less
             this.state = 'seeking_food';
             const nearbyFood = world.food.filter(f => this.distanceTo(f) < 100);
             if (nearbyFood.length > 0) {
@@ -82,12 +91,12 @@ class Creature {
                 this.wander(); // No food nearby, wander to find some
             }
         } else {
-            // Try to mate when energy is half or more
+            // Try to mate when energy is more than half
             this.state = 'mating';
             if (this.reproductionCooldown <= 0) {
                 const nearbyCreatures = world.creatures.filter(c => 
                     c !== this && 
-                    c.energy >= c.maxEnergy * 0.5 && 
+                    c.energy > c.maxEnergy * 0.5 && 
                     c.reproductionCooldown <= 0 &&
                     this.distanceTo(c) < this.radius + c.radius + 20
                 );
@@ -180,8 +189,8 @@ class Creature {
     }
     
     reproduce(mate, world) {
-        // Both parents need enough energy (relative to their max)
-        if (this.energy < this.maxEnergy * 0.5 || mate.energy < mate.maxEnergy * 0.5) return;
+        // Both parents need more than half energy
+        if (this.energy <= this.maxEnergy * 0.5 || mate.energy <= mate.maxEnergy * 0.5) return;
         
         // Create offspring with genetic crossover and mutation
         const childGenes = this.crossoverGenes(mate);
@@ -198,40 +207,46 @@ class Creature {
         world.stats.totalReproductions++;
         
         // Reproduction costs energy (relative to max energy)
-        this.energy -= this.maxEnergy * 0.3;
-        mate.energy -= mate.maxEnergy * 0.3;
+        this.energy = parseFloat((this.energy - this.maxEnergy * 0.3).toFixed(2));
+        mate.energy = parseFloat((mate.energy - mate.maxEnergy * 0.3).toFixed(2));
         this.reproductionCooldown = 200;
         mate.reproductionCooldown = 200;
     }
     
     crossoverGenes(mate) {
-        // Simple genetic crossover - average parents' genes
+        // Simple genetic crossover - average parents' genes with 2 decimal precision
         return {
-            size: (this.genes.size + mate.genes.size) / 2,
-            speed: (this.genes.speed + mate.genes.speed) / 2
+            size: parseFloat(((this.genes.size + mate.genes.size) / 2).toFixed(2)),
+            speed: parseFloat(((this.genes.speed + mate.genes.speed) / 2).toFixed(2)),
+            hasMutation: false // Will be set during mutation
         };
     }
     
     mutateGenes(genes) {
         const mutationRate = 0.1; // 10% chance per trait
+        let hasMutated = false;
         
         // Mutate size
         if (Math.random() < mutationRate) {
-            const mutationFactor = 1 + (Math.random() - 0.5); // 0.5 to 1.5 multiplier
-            genes.size *= mutationFactor;
-            genes.size = Math.max(0.1, Math.min(10, genes.size)); // Keep in 0.1-10 range
+            const mutationFactor = 0.8 + Math.random() * 0.4; // 0.8 to 1.2 multiplier (-20% to +20%)
+            genes.size = parseFloat((genes.size * mutationFactor).toFixed(2));
+            genes.size = parseFloat(Math.max(0.10, Math.min(10.00, genes.size)).toFixed(2)); // Keep in 0.10-10.00 range
+            hasMutated = true;
         }
         
         // Mutate speed
         if (Math.random() < mutationRate) {
-            const mutationFactor = 1 + (Math.random() - 0.5); // 0.5 to 1.5 multiplier
-            genes.speed *= mutationFactor;
-            genes.speed = Math.max(0.1, Math.min(10, genes.speed)); // Keep in 0.1-10 range
+            const mutationFactor = 0.8 + Math.random() * 0.4; // 0.8 to 1.2 multiplier (-20% to +20%)
+            genes.speed = parseFloat((genes.speed * mutationFactor).toFixed(2));
+            genes.speed = parseFloat(Math.max(0.10, Math.min(10.00, genes.speed)).toFixed(2)); // Keep in 0.10-10.00 range
+            hasMutated = true;
         }
+        
+        genes.hasMutation = hasMutated;
     }
     
     eatFood(food, world) {
-        this.energy = Math.min(this.maxEnergy, this.energy + 5); // Energy gain of 5 units per food
+        this.energy = parseFloat(Math.min(this.maxEnergy, this.energy + 5).toFixed(2)); // Energy gain of 5 units per food
         world.removeFood(food);
     }
     
@@ -287,16 +302,6 @@ class Creature {
         
         // Draw eyes
         this.drawEyes(ctx, wiggle);
-        
-        // Draw size indicator (spikes for large creatures)
-        if (this.genes.size > 3) {
-            this.drawSpikes(ctx, wiggle);
-        }
-        
-        // Draw speed indicator (speed lines for fast creatures)
-        if (this.genes.speed > 3) {
-            this.drawSpeedLines(ctx, wiggle);
-        }
         
         // Energy bar
         this.drawEnergyBar(ctx);
@@ -361,47 +366,7 @@ class Creature {
         ctx.fill();
     }
     
-    drawSpikes(ctx, wiggle) {
-        const spikeCount = 6;
-        const spikeLength = this.radius * 0.3;
-        
-        ctx.strokeStyle = this.darkenColor(this.getColor(), 50);
-        ctx.lineWidth = 2;
-        
-        for (let i = 0; i < spikeCount; i++) {
-            const angle = (i / spikeCount) * Math.PI * 2;
-            const startX = this.x + Math.cos(angle) * this.radius * 0.8;
-            const startY = this.y + Math.sin(angle) * this.radius * 0.8 + wiggle;
-            const endX = this.x + Math.cos(angle) * (this.radius * 0.8 + spikeLength);
-            const endY = this.y + Math.sin(angle) * (this.radius * 0.8 + spikeLength) + wiggle;
-            
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(endX, endY);
-            ctx.stroke();
-        }
-    }
-    
-    drawSpeedLines(ctx, wiggle) {
-        const lineCount = 3;
-        const lineLength = this.radius * 0.8;
-        
-        ctx.strokeStyle = 'rgba(52, 152, 219, 0.6)';
-        ctx.lineWidth = 2;
-        
-        for (let i = 0; i < lineCount; i++) {
-            const offsetY = (i - 1) * 8;
-            const startX = this.x - this.radius - 5;
-            const startY = this.y + offsetY + wiggle;
-            const endX = startX - lineLength;
-            const endY = startY;
-            
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(endX, endY);
-            ctx.stroke();
-        }
-    }
+
     
     drawEnergyBar(ctx) {
         const barWidth = this.radius * 2;
@@ -459,11 +424,11 @@ class Creature {
         const textX = tooltipX + 8;
         let textY = tooltipY + 18;
         
-        ctx.fillText(`Size: ${this.genes.size.toFixed(1)}`, textX, textY);
+        ctx.fillText(`Size: ${this.genes.size.toFixed(2)}`, textX, textY);
         textY += 16;
-        ctx.fillText(`Speed: ${this.genes.speed.toFixed(1)}`, textX, textY);
+        ctx.fillText(`Speed: ${this.genes.speed.toFixed(2)}`, textX, textY);
         textY += 16;
-        ctx.fillText(`Energy: ${this.energy.toFixed(1)}/${this.maxEnergy.toFixed(1)}`, textX, textY);
+        ctx.fillText(`Energy: ${this.energy.toFixed(2)}/${this.maxEnergy.toFixed(2)}`, textX, textY);
         
         // Arrow pointing to creature
         ctx.beginPath();
