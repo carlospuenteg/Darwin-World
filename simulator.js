@@ -10,21 +10,23 @@ class Creature {
             this.genes = { ...genes };
         } else {
             this.genes = {
-                size: 1  // Default starting size is 1
+                size: 1,  // Default starting size is 1
+                speed: 1  // Default starting speed is 1
             };
         }
         
         // Derived properties from genes
         this.radius = 8 + this.genes.size * 4; // Size 1 = 12px (50% bigger), range 8.4-48 pixels
-        this.maxSpeed = 1 / this.genes.size; // Speed is inverse of size
-        this.strength = this.genes.size * 50; // Used in combat
+        this.maxSpeed = this.genes.speed; // Speed trait directly determines movement speed
         
         // Life properties - energy based on size
-        this.maxEnergy = this.genes.size;
+        this.maxEnergy = this.genes.size * 10; // initial energy = maximum energy = size * 10
         this.energy = this.maxEnergy;
         this.age = 0;
         this.maxAge = 1000 + Math.random() * 2000;
         this.reproductionCooldown = 0;
+        this.birthTime = Date.now(); // Track when creature was born
+        this.bornFromReproduction = genes ? true : false; // Track if born from reproduction or spawned randomly
         
         // Behavior state
         this.target = null;
@@ -38,13 +40,17 @@ class Creature {
     }
     
     getColor() {
-        // All creatures are red for now
-        return '#e74c3c';
+        // Yellow for first 2 seconds of life if born from reproduction, otherwise always red
+        const ageInSeconds = (Date.now() - this.birthTime) / 1000;
+        if (this.bornFromReproduction && ageInSeconds < 2) {
+            return '#f1c40f'; // Yellow for newborns from reproduction
+        }
+        return '#e74c3c'; // Red for adults and randomly spawned creatures
     }
     
     update(world) {
         this.age++;
-        this.energy -= (this.genes.size / 600); // Energy consumption: 1 energy lasts ~10 seconds (600 frames at 60fps)
+        this.energy -= (this.genes.speed * this.genes.size / 60); // Energy consumption: 1 energy/second * speed * size (60fps)
         this.reproductionCooldown = Math.max(0, this.reproductionCooldown - 1);
         
         // Die if too old or no energy
@@ -79,26 +85,14 @@ class Creature {
             this.target = this.findClosest(nearbyFood);
             this.moveToward(this.target);
         } else if (this.energy > this.maxEnergy * 0.6 && this.reproductionCooldown <= 0 && nearbyCreatures.length > 0) {
-            // Try to reproduce when well-fed
+            // Try to reproduce when well-fed and close to another creature
             const mate = nearbyCreatures.find(c => 
-                c.energy > c.maxEnergy * 0.6 && c.reproductionCooldown <= 0
+                c.energy > c.maxEnergy * 0.6 && c.reproductionCooldown <= 0 &&
+                this.distanceTo(c) < this.radius + c.radius + 10 // Close enough to reproduce
             );
             if (mate) {
                 this.state = 'mating';
-                this.target = mate;
-                this.moveToward(mate);
-                if (this.distanceTo(mate) < this.radius + mate.radius) {
-                    this.reproduce(mate, world);
-                }
-            }
-        } else if (Math.random() < 0.1 && nearbyCreatures.length > 0) {
-            // Occasionally fight (reduced aggression for now)
-            const enemy = nearbyCreatures[Math.floor(Math.random() * nearbyCreatures.length)];
-            this.state = 'fighting';
-            this.target = enemy;
-            this.moveToward(enemy);
-            if (this.distanceTo(enemy) < this.radius + enemy.radius) {
-                this.fight(enemy, world);
+                this.reproduce(mate, world);
             }
         } else {
             // Wander randomly
@@ -135,9 +129,7 @@ class Creature {
         this.x += this.vx;
         this.y += this.vy;
         
-        // Energy cost for movement (scales with size and speed)
-        const movementCost = Math.sqrt(this.vx * this.vx + this.vy * this.vy) * (this.genes.size / 600);
-        this.energy -= movementCost;
+        // No additional movement cost - already included in base consumption
         
         // Friction
         this.vx *= 0.95;
@@ -184,29 +176,7 @@ class Creature {
         return closest;
     }
     
-    fight(enemy, world) {
-        // Combat based on size/strength with some randomness
-        const myPower = this.strength + Math.random() * 20;
-        const enemyPower = enemy.strength + Math.random() * 20;
-        
-        if (myPower > enemyPower) {
-            // I win - gain energy, enemy loses more
-            this.energy = Math.min(this.maxEnergy, this.energy + 0.2);
-            enemy.energy -= 0.5;
-            enemy.vx += (enemy.x - this.x) * 0.1; // Knockback
-            enemy.vy += (enemy.y - this.y) * 0.1;
-        } else {
-            // Enemy wins
-            this.energy -= 0.5;
-            enemy.energy = Math.min(enemy.maxEnergy, enemy.energy + 0.2);
-            this.vx += (this.x - enemy.x) * 0.1; // Knockback
-            this.vy += (this.y - enemy.y) * 0.1;
-        }
-        
-        // Both lose some energy from fighting
-        this.energy -= 0.1;
-        enemy.energy -= 0.1;
-    }
+
     
     reproduce(mate, world) {
         // Both parents need enough energy (relative to their max)
@@ -216,9 +186,9 @@ class Creature {
         const childGenes = this.crossoverGenes(mate);
         this.mutateGenes(childGenes);
         
-        // Place child near parents
-        const childX = (this.x + mate.x) / 2 + (Math.random() - 0.5) * 50;
-        const childY = (this.y + mate.y) / 2 + (Math.random() - 0.5) * 50;
+        // Place child right next to parents
+        const childX = (this.x + mate.x) / 2 + (Math.random() - 0.5) * 20;
+        const childY = (this.y + mate.y) / 2 + (Math.random() - 0.5) * 20;
         
         const child = new Creature(childX, childY, childGenes);
         
@@ -236,23 +206,31 @@ class Creature {
     crossoverGenes(mate) {
         // Simple genetic crossover - average parents' genes
         return {
-            size: (this.genes.size + mate.genes.size) / 2
+            size: (this.genes.size + mate.genes.size) / 2,
+            speed: (this.genes.speed + mate.genes.speed) / 2
         };
     }
     
     mutateGenes(genes) {
-        const mutationRate = 0.1; // 10% chance
+        const mutationRate = 0.1; // 10% chance per trait
         
+        // Mutate size
         if (Math.random() < mutationRate) {
-            // Random change from -50% to +50% of original size
             const mutationFactor = 1 + (Math.random() - 0.5); // 0.5 to 1.5 multiplier
             genes.size *= mutationFactor;
             genes.size = Math.max(0.1, Math.min(10, genes.size)); // Keep in 0.1-10 range
         }
+        
+        // Mutate speed
+        if (Math.random() < mutationRate) {
+            const mutationFactor = 1 + (Math.random() - 0.5); // 0.5 to 1.5 multiplier
+            genes.speed *= mutationFactor;
+            genes.speed = Math.max(0.1, Math.min(10, genes.speed)); // Keep in 0.1-10 range
+        }
     }
     
     eatFood(food, world) {
-        this.energy = Math.min(this.maxEnergy, this.energy + 0.5); // Smaller energy gain relative to new scale
+        this.energy = Math.min(this.maxEnergy, this.energy + 5); // Energy gain of 5 units per food
         world.removeFood(food);
     }
     
@@ -289,8 +267,8 @@ class Creature {
             this.x, this.y + wiggle, this.radius
         );
         
-        // Base color with highlights
-        const baseColor = this.color;
+        // Base color with highlights (update color dynamically)
+        const baseColor = this.getColor();
         const lightColor = this.lightenColor(baseColor, 40);
         const darkColor = this.darkenColor(baseColor, 30);
         
@@ -312,6 +290,11 @@ class Creature {
         // Draw size indicator (spikes for large creatures)
         if (this.genes.size > 3) {
             this.drawSpikes(ctx, wiggle);
+        }
+        
+        // Draw speed indicator (speed lines for fast creatures)
+        if (this.genes.speed > 3) {
+            this.drawSpeedLines(ctx, wiggle);
         }
         
         // Energy bar (more stylized)
@@ -401,7 +384,26 @@ class Creature {
         }
     }
     
-
+    drawSpeedLines(ctx, wiggle) {
+        const lineCount = 3;
+        const lineLength = this.radius * 0.8;
+        
+        ctx.strokeStyle = 'rgba(52, 152, 219, 0.6)';
+        ctx.lineWidth = 2;
+        
+        for (let i = 0; i < lineCount; i++) {
+            const offsetY = (i - 1) * 8;
+            const startX = this.x - this.radius - 5;
+            const startY = this.y + offsetY + wiggle;
+            const endX = startX - lineLength;
+            const endY = startY;
+            
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+        }
+    }
     
     drawEnergyBar(ctx) {
         const barWidth = this.radius * 2;
@@ -492,7 +494,7 @@ class Creature {
         
         ctx.fillText(`Size: ${this.genes.size.toFixed(1)}`, textX, textY);
         textY += 16;
-        ctx.fillText(`Speed: ${this.maxSpeed.toFixed(2)}`, textX, textY);
+        ctx.fillText(`Speed: ${this.genes.speed.toFixed(1)}`, textX, textY);
         textY += 16;
         ctx.fillText(`Energy: ${this.energy.toFixed(1)}/${this.maxEnergy.toFixed(1)}`, textX, textY);
         
@@ -676,7 +678,7 @@ class World {
         }
         
         const totalSize = this.creatures.reduce((acc, creature) => acc + creature.genes.size, 0);
-        const totalSpeed = this.creatures.reduce((acc, creature) => acc + creature.maxSpeed, 0);
+        const totalSpeed = this.creatures.reduce((acc, creature) => acc + creature.genes.speed, 0);
         
         return {
             size: totalSize / this.creatures.length,
@@ -740,7 +742,6 @@ const populationStat = document.getElementById('population');
 const generationStat = document.getElementById('generation');
 const avgSizeStat = document.getElementById('avgSize');
 const avgSpeedStat = document.getElementById('avgSpeed');
-const avgAggressionStat = document.getElementById('avgAggression');
 
 // Event listeners
 startBtn.addEventListener('click', () => {
@@ -825,8 +826,7 @@ function updateStats() {
     populationStat.textContent = world.creatures.length;
     generationStat.textContent = world.stats.totalReproductions;
     avgSizeStat.textContent = avgTraits.size.toFixed(1);
-    avgSpeedStat.textContent = avgTraits.speed.toFixed(2);
-    avgAggressionStat.textContent = 'N/A'; // No aggression stat for now
+    avgSpeedStat.textContent = avgTraits.speed.toFixed(1);
 }
 
 // Initialize the simulation

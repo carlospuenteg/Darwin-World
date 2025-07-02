@@ -180,10 +180,6 @@
                         <span>Avg Speed:</span>
                         <span class="stat-value" id="avgSpeed">0</span>
                     </div>
-                    <div class="stat-item">
-                        <span>Avg Aggression:</span>
-                        <span class="stat-value" id="avgAggression">0</span>
-                    </div>
                 </div>
                 
                 <div class="control-group">
@@ -205,8 +201,12 @@
                 <div class="legend">
                     <h3>🎨 Legend</h3>
                     <div class="legend-item">
+                        <div class="legend-color" style="background: #f1c40f;"></div>
+                        <span>Newborn (first 2 sec)</span>
+                    </div>
+                    <div class="legend-item">
                         <div class="legend-color" style="background: #e74c3c;"></div>
-                        <span>Creatures (All Red)</span>
+                        <span>Adult Creatures</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #3498db;"></div>
@@ -216,16 +216,21 @@
                         <div class="legend-color" style="background: #2c3e50;"></div>
                         <span>Spikes = Large Size (>3)</span>
                     </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3498db;"></div>
+                        <span>Speed Lines = Fast (>3)</span>
+                    </div>
                 </div>
                 
                 <div class="control-group">
                     <h3>ℹ️ Info</h3>
                     <p style="font-size: 0.8em; line-height: 1.4; opacity: 0.8;">
-                        • Size determines energy and speed<br>
-                        • Large = high energy, slow speed<br>
-                        • Small = low energy, fast speed<br>
-                        • 10% mutation chance (-50% to +50%)<br>
-                        • 1 energy lasts ~10 seconds
+                        • Max energy = size × 10<br>
+                        • Energy rate = speed × size per second<br>
+                        • Two traits: size (0.1-10) & speed (0.1-10)<br>
+                        • 10% mutation chance per trait (-50% to +50%)<br>
+                        • No fighting - only starvation deaths<br>
+                        • Yellow newborns from reproduction only
                     </p>
                 </div>
             </div>
