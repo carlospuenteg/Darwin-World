@@ -12,7 +12,6 @@ let geneHistory = {
     speed: [],
     appetite: []
 };
-const maxHistoryLength = 200;
 
 // Initialize simulation
 function initializeSimulation() {
@@ -80,18 +79,11 @@ function updateStats() {
     document.getElementById('avgSpeed').textContent = avgTraits.speed.toFixed(2);
     document.getElementById('avgAppetite').textContent = avgTraits.appetite.toFixed(2);
     
-    // Update gene history for graph
+    // Update gene history for graph (keep full simulation history)
     if (world.creatures.length > 0) {
         geneHistory.size.push(avgTraits.size);
         geneHistory.speed.push(avgTraits.speed);
         geneHistory.appetite.push(avgTraits.appetite);
-        
-        // Keep history at max length
-        if (geneHistory.size.length > maxHistoryLength) {
-            geneHistory.size.shift();
-            geneHistory.speed.shift();
-            geneHistory.appetite.shift();
-        }
     }
 }
 
@@ -101,19 +93,22 @@ function updateGraph() {
     
     const width = graphCanvas.width;
     const height = graphCanvas.height;
+    const padding = 20; // Add padding around the graph
+    const graphWidth = width - 2 * padding;
+    const graphHeight = height - 2 * padding;
     
     // Clear graph
     graphCtx.fillStyle = 'rgba(0,0,0,0.8)';
     graphCtx.fillRect(0, 0, width, height);
     
-    // Draw grid
+    // Draw grid with padding
     graphCtx.strokeStyle = 'rgba(255,255,255,0.1)';
     graphCtx.lineWidth = 1;
     for (let i = 0; i <= 5; i++) {
-        const y = (height / 5) * i;
+        const y = padding + (graphHeight / 5) * i;
         graphCtx.beginPath();
-        graphCtx.moveTo(0, y);
-        graphCtx.lineTo(width, y);
+        graphCtx.moveTo(padding, y);
+        graphCtx.lineTo(width - padding, y);
         graphCtx.stroke();
     }
     
@@ -126,7 +121,7 @@ function updateGraph() {
     const maxVal = Math.max(...allValues);
     const range = maxVal - minVal || 1;
     
-    // Draw gene lines
+    // Draw gene lines with padding
     const genes = [
         { data: geneHistory.size, color: '#e74c3c', name: 'Size' },
         { data: geneHistory.speed, color: '#3498db', name: 'Speed' }, 
@@ -139,9 +134,9 @@ function updateGraph() {
         graphCtx.beginPath();
         
         for (let i = 0; i < gene.data.length; i++) {
-            const x = (i / (historyLength - 1)) * width;
+            const x = padding + (i / (historyLength - 1)) * graphWidth;
             const normalizedValue = (gene.data[i] - minVal) / range;
-            const y = height - (normalizedValue * height);
+            const y = height - padding - (normalizedValue * graphHeight);
             
             if (i === 0) {
                 graphCtx.moveTo(x, y);
@@ -150,6 +145,65 @@ function updateGraph() {
             }
         }
         graphCtx.stroke();
+        
+        // Draw current value at the end of the line
+        if (gene.data.length > 0) {
+            const lastValue = gene.data[gene.data.length - 1];
+            const lastX = padding + ((gene.data.length - 1) / (historyLength - 1)) * graphWidth;
+            const lastNormalizedValue = (lastValue - minVal) / range;
+            const lastY = height - padding - (lastNormalizedValue * graphHeight);
+            
+            // Draw circle at end point
+            graphCtx.fillStyle = gene.color;
+            graphCtx.beginPath();
+            graphCtx.arc(lastX, lastY, 5, 0, 2 * Math.PI);
+            graphCtx.fill();
+        }
+    });
+    
+    // Draw all value labels separately to prevent overlapping
+    const valuePositions = [];
+    genes.forEach((gene, index) => {
+        if (gene.data.length > 0) {
+            const lastValue = gene.data[gene.data.length - 1];
+            const lastX = padding + ((gene.data.length - 1) / (historyLength - 1)) * graphWidth;
+            const lastNormalizedValue = (lastValue - minVal) / range;
+            let lastY = height - padding - (lastNormalizedValue * graphHeight);
+            
+            // Adjust Y position to prevent overlapping
+            const minDistance = 16;
+            for (const pos of valuePositions) {
+                if (Math.abs(lastY - pos.y) < minDistance) {
+                    if (lastY < pos.y) {
+                        lastY = pos.y - minDistance;
+                    } else {
+                        lastY = pos.y + minDistance;
+                    }
+                }
+            }
+            
+            // Keep within bounds
+            lastY = Math.max(padding + 8, Math.min(height - padding - 8, lastY));
+            valuePositions.push({ y: lastY });
+            
+            // Draw background for text
+            const text = lastValue.toFixed(2);
+            graphCtx.font = 'bold 12px Arial';
+            const textMetrics = graphCtx.measureText(text);
+            const textWidth = textMetrics.width;
+            const textHeight = 14;
+            
+            let textX = Math.min(lastX + 10, width - padding - textWidth - 4);
+            
+            // Draw background rectangle
+            graphCtx.fillStyle = 'rgba(0,0,0,0.7)';
+            graphCtx.fillRect(textX - 2, lastY - textHeight + 2, textWidth + 4, textHeight);
+            
+            // Draw text
+            graphCtx.fillStyle = gene.color;
+            graphCtx.textAlign = 'left';
+            graphCtx.fillText(text, textX, lastY);
+        }
     });
     
     // Draw legend
@@ -160,6 +214,25 @@ function updateGraph() {
         graphCtx.fillRect(5, y - 8, 8, 8);
         graphCtx.fillText(gene.name, 18, y);
     });
+    
+    // Update min/max display below the graph
+    if (geneHistory.size.length > 0) {
+        const sizeMin = Math.min(...geneHistory.size).toFixed(2);
+        const sizeMax = Math.max(...geneHistory.size).toFixed(2);
+        const speedMin = Math.min(...geneHistory.speed).toFixed(2);
+        const speedMax = Math.max(...geneHistory.speed).toFixed(2);
+        const appetiteMin = Math.min(...geneHistory.appetite).toFixed(2);
+        const appetiteMax = Math.max(...geneHistory.appetite).toFixed(2);
+        
+        const minMaxDiv = document.getElementById('geneMinMax');
+        minMaxDiv.innerHTML = `
+            <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                <span style="color: #e74c3c; font-size: 13px;"><strong>Size:</strong> ${sizeMin} - ${sizeMax}</span>
+                <span style="color: #3498db; font-size: 13px;"><strong>Speed:</strong> ${speedMin} - ${speedMax}</span>
+                <span style="color: #2ecc71; font-size: 13px;"><strong>Appetite:</strong> ${appetiteMin} - ${appetiteMax}</span>
+            </div>
+        `;
+    }
 }
 
 // Control functions
@@ -184,6 +257,9 @@ function resetSimulation() {
     world.initialFood = parseInt(document.getElementById('initialFood').value);
     world.baseConsumption = parseFloat(document.getElementById('baseConsumption').value);
     world.gameSpeed = parseFloat(document.getElementById('gameSpeed').value);
+    world.creatureSpeed = parseFloat(document.getElementById('creatureSpeed').value);
+    world.creatureSize = parseFloat(document.getElementById('creatureSize').value);
+    world.baseEnergy = parseFloat(document.getElementById('baseEnergy').value);
     
     // Reset gene history
     geneHistory = { size: [], speed: [], appetite: [] };
@@ -231,6 +307,12 @@ function applySettings() {
     world.initialFood = parseInt(document.getElementById('initialFood').value);
     world.baseConsumption = parseFloat(document.getElementById('baseConsumption').value);
     world.gameSpeed = parseFloat(document.getElementById('gameSpeed').value);
+    world.creatureSpeed = parseFloat(document.getElementById('creatureSpeed').value);
+    world.creatureSize = parseFloat(document.getElementById('creatureSize').value);
+    world.baseEnergy = parseFloat(document.getElementById('baseEnergy').value);
+    
+    // Update all existing creatures with new world parameters
+    world.creatures.forEach(creature => creature.setWorldParams(world));
 }
 
 // Load config values into UI inputs
@@ -240,6 +322,15 @@ function loadConfigIntoUI() {
     document.getElementById('initialFood').value = CONFIG.initialFood;
     document.getElementById('baseConsumption').value = CONFIG.baseConsumption;
     document.getElementById('gameSpeed').value = CONFIG.gameSpeed;
+    document.getElementById('creatureSpeed').value = CONFIG.creatureSpeed;
+    document.getElementById('creatureSize').value = CONFIG.creatureSize;
+    document.getElementById('baseEnergy').value = CONFIG.baseEnergy;
+}
+
+// Set speed from preset buttons
+function setSpeed(speed) {
+    document.getElementById('gameSpeed').value = speed;
+    applySettings();
 }
 
 // Initialize when page loads
@@ -259,4 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('initialFood').addEventListener('input', applySettings);
     document.getElementById('baseConsumption').addEventListener('input', applySettings);
     document.getElementById('gameSpeed').addEventListener('input', applySettings);
+    document.getElementById('creatureSpeed').addEventListener('input', applySettings);
+    document.getElementById('creatureSize').addEventListener('input', applySettings);
+    document.getElementById('baseEnergy').addEventListener('input', applySettings);
 }); 

@@ -22,7 +22,7 @@ class Creature {
             this.hasMutation = false;
         }
         
-        // Derived properties from genes
+        // Derived properties from genes (will be updated with world values in setWorldParams)
         this.radius = parseFloat((8 + this.genes.size * 4).toFixed(2)); // Size 1 = 12px (50% bigger), range 8.4-48 pixels
         this.maxSpeed = parseFloat((this.genes.speed * (1 / this.genes.size)).toFixed(2)); // Actual speed = speed * (1/size)
         
@@ -42,13 +42,30 @@ class Creature {
         // Interaction properties
         this.isHovered = false;
     }
+
+    setWorldParams(world) {
+        // Update derived properties with world values
+        // Visual size only (doesn't affect other calculations) = creature_size * base_visual_size
+        this.radius = parseFloat((8 + (world.creatureSize * this.genes.size) * 4).toFixed(2));
+        
+        // Actual speed = creature_speed * speed * (1/size)
+        this.maxSpeed = parseFloat((world.creatureSpeed * this.genes.speed * (1 / this.genes.size)).toFixed(2));
+        
+        // Max energy = size * base_energy (size affects energy, not visual scaling)
+        this.maxEnergy = parseFloat((this.genes.size * world.baseEnergy).toFixed(2));
+        
+        // If this is a new creature, set energy to half of max
+        if (this.energy === this.maxEnergy / 2) {
+            this.energy = this.maxEnergy / 2;
+        }
+    }
     
     getColor() {
         // Color based on age and mutation status for newborns
         const ageInSeconds = (Date.now() - this.birthTime) / 1000;
         if (this.bornFromReproduction && ageInSeconds < 2) {
             if (this.hasMutation) {
-                return '#3498db'; // Blue for newborns with mutations
+                return '#2ecc71'; // Green for newborns with mutations
             } else {
                 return '#f1c40f'; // Yellow for normal newborns from reproduction
             }
@@ -249,6 +266,7 @@ class Creature {
         const childY = (this.y + mate.y) / 2 + (Math.random() - 0.5) * 20;
         
         const child = new Creature(childX, childY, childGenes);
+        child.setWorldParams(world);
         
         world.creatures.push(child);
         world.stats.totalBirths++;

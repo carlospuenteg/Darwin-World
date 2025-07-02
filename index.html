@@ -15,9 +15,9 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 10px;
         }
         
         h1 {
@@ -45,6 +45,9 @@
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
         #gameCanvas {
@@ -55,7 +58,7 @@
         }
         
         .controls {
-            width: 300px;
+            width: 450px;
             background: rgba(255,255,255,0.1);
             border-radius: 15px;
             padding: 20px;
@@ -183,6 +186,121 @@
             display: block;
             width: 100%;
         }
+
+        .stats-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .controls-row button {
+            flex: 1;
+        }
+
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .controls-section {
+            display: flex;
+            gap: 10px;
+        }
+
+        .controls-section button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .controls-section button:hover {
+            background: linear-gradient(45deg, #2980b9, #3498db);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .speed-control h3 {
+            margin: 0;
+            font-size: 1.2em;
+            color: #ecf0f1;
+        }
+
+        .speed-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .speed-inputs input {
+            width: 80px;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .speed-presets {
+            display: flex;
+            gap: 5px;
+        }
+
+        .speed-presets button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .speed-presets button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .bottom-section {
+            margin-top: 30px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+        }
     </style>
 </head>
 <body>
@@ -190,66 +308,89 @@
         <h1>🧬 Darwin World</h1>
         <p class="subtitle">Watch evolution in action as creatures seek food and mate</p>
         
+        <div class="top-controls">
+            <div class="controls-section">
+                <button id="startBtn">Play</button>
+                <button id="pauseBtn">Pause</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+            
+            <div class="speed-control">
+                <h3>⚡ Simulation Speed</h3>
+                <div class="speed-inputs">
+                    <input type="number" id="gameSpeed" min="0" max="10000" step="0.1">
+                    <div class="speed-presets">
+                        <button onclick="setSpeed(2)">x2</button>
+                        <button onclick="setSpeed(10)">x10</button>
+                        <button onclick="setSpeed(100)">x100</button>
+                        <button onclick="setSpeed(1000)">x1000</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="game-container">
             <div class="canvas-container">
                 <canvas id="gameCanvas" width="800" height="600"></canvas>
             </div>
             
             <div class="controls">
-                <div class="stats">
-                    <h3>📊 Population Stats</h3>
-                    <div class="stat-item">
-                        <span>Creatures:</span>
-                        <span class="stat-value" id="creatureCount">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>Food:</span>
-                        <span class="stat-value" id="foodCount">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>Reproductions:</span>
-                        <span class="stat-value" id="totalReproductions">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>Births:</span>
-                        <span class="stat-value" id="totalBirths">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>Deaths:</span>
-                        <span class="stat-value" id="totalDeaths">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>Mutations:</span>
-                        <span class="stat-value" id="totalMutations">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>Avg Size:</span>
-                        <span class="stat-value gene-value" id="avgSize">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>Avg Speed:</span>
-                        <span class="stat-value gene-value" id="avgSpeed">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>Avg Appetite:</span>
-                        <span class="stat-value gene-value" id="avgAppetite">0</span>
-                    </div>
-                </div>
-                
                 <div class="control-group">
                     <h3>📈 Gene Evolution</h3>
                     <div class="graph-container">
-                        <canvas id="geneGraph" width="260" height="150"></canvas>
+                        <canvas id="geneGraph" width="410" height="280"></canvas>
+                        <div id="geneMinMax" style="font-size: 12px; color: #ecf0f1; margin-top: 8px; font-weight: bold;"></div>
                     </div>
                 </div>
-                
-                <div class="control-group">
-                    <h3>🎮 Controls</h3>
-                    <button id="startBtn">Start Simulation</button>
-                    <button id="pauseBtn">Pause</button>
-                    <button id="resetBtn">Reset World</button>
+
+                <div class="stats">
+                    <h3>📊 Population Stats</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span>Creatures:</span>
+                            <span class="stat-value" id="creatureCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Food:</span>
+                            <span class="stat-value" id="foodCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Births:</span>
+                            <span class="stat-value" id="totalBirths">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Deaths:</span>
+                            <span class="stat-value" id="totalDeaths">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Reproductions:</span>
+                            <span class="stat-value" id="totalReproductions">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Mutations:</span>
+                            <span class="stat-value" id="totalMutations">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Avg Size:</span>
+                            <span class="stat-value gene-value" id="avgSize">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Avg Speed:</span>
+                            <span class="stat-value gene-value" id="avgSpeed">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Avg Appetite:</span>
+                            <span class="stat-value gene-value" id="avgAppetite">0</span>
+                        </div>
+                    </div>
                 </div>
-                
+
+
+            </div>
+        </div>
+
+        <div class="bottom-section">
+            <div class="bottom-grid">
                 <div class="control-group">
                     <h3>⚙️ Settings</h3>
                     <div class="setting-item">
@@ -269,44 +410,52 @@
                         <input type="number" id="baseConsumption" min="0" max="10" step="0.1">
                     </div>
                     <div class="setting-item">
-                        <label for="gameSpeed">Game speed:</label>
-                        <input type="number" id="gameSpeed" min="0" max="100" step="0.1">
+                        <label for="creatureSpeed">Creature speed:</label>
+                        <input type="number" id="creatureSpeed" min="0" max="10" step="0.1">
+                    </div>
+                    <div class="setting-item">
+                        <label for="creatureSize">Creature size:</label>
+                        <input type="number" id="creatureSize" min="0" max="10" step="0.1">
+                    </div>
+                    <div class="setting-item">
+                        <label for="baseEnergy">Base energy:</label>
+                        <input type="number" id="baseEnergy" min="1" max="100" step="1">
                     </div>
                 </div>
-                
-
                 
                 <div class="legend">
                     <h3>🎨 Legend</h3>
                     <div class="legend-item">
+                        <div class="legend-color" style="background: #e74c3c;"></div>
+                        <span>Adult creatures</span>
+                    </div>
+                    <div class="legend-item">
                         <div class="legend-color" style="background: #f1c40f;"></div>
-                        <span>Newborn (first 2 sec)</span>
+                        <span>Normal newborns (2 seconds)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #2ecc71;"></div>
+                        <span>Mutant newborns (2 seconds)</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #3498db;"></div>
-                        <span>Mutant newborn (first 2 sec)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #e74c3c;"></div>
-                        <span>Adult Creatures</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #3498db; opacity: 0.7;"></div>
                         <span>Food</span>
                     </div>
                 </div>
-                
+
                 <div class="control-group">
-                    <h3>ℹ️ Info</h3>
-                    <p style="font-size: 0.8em; line-height: 1.4; opacity: 0.8;">
-                        • Starts with configurable creatures (half energy)<br>
-                        • Genes: size, speed, appetite (0.1-10, 0.1-10, 0.1-1.0)<br>
-                        • Actual speed = speed × (1/size)<br>
-                        • Max energy = size × 10<br>
-                        • Energy ≤30%: seek food, ≥70%: reproduce<br>
-                        • 30-70%: decision = food_dist × appetite - mate_dist × (1/appetite)<br>
-                        • 10% mutation chance per gene (±20%)<br>
-                    </p>
+                    <h3>ℹ️ Information</h3>
+                    <div style="font-size: 0.9em; line-height: 1.5;">
+                        <p><strong>Evolution Mechanics:</strong></p>
+                        <p>• Energy ≤30%: Must seek food</p>
+                        <p>• Energy ≥70%: Must reproduce</p>
+                        <p>• Energy 30-70%: Decision based on appetite</p>
+                        <p><strong>Genetics:</strong></p>
+                        <p>• Size: Visual scale & energy capacity</p>
+                        <p>• Speed: Movement rate (÷ by size)</p>
+                        <p>• Appetite: Food vs mating preference</p>
+                        <p>• 10% mutation chance per gene</p>
+                    </div>
                 </div>
             </div>
         </div>

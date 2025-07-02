@@ -18,6 +18,9 @@ class World {
         this.initialCreatures = CONFIG.initialCreatures; // Initial creatures (will be updated from UI)
         this.baseConsumption = CONFIG.baseConsumption; // Base energy consumption (will be updated from UI)
         this.gameSpeed = CONFIG.gameSpeed; // Game speed multiplier (will be updated from UI)
+        this.creatureSpeed = CONFIG.creatureSpeed; // Creature speed multiplier (will be updated from UI)
+        this.creatureSize = CONFIG.creatureSize; // Creature size multiplier (will be updated from UI)
+        this.baseEnergy = CONFIG.baseEnergy; // Base energy multiplier (will be updated from UI)
     }
     
     initialize() {
@@ -34,7 +37,9 @@ class World {
         for (let i = 0; i < this.initialCreatures; i++) {
             const x = 50 + Math.random() * (this.width - 100);
             const y = 50 + Math.random() * (this.height - 100);
-            this.creatures.push(new Creature(x, y));
+            const creature = new Creature(x, y);
+            creature.setWorldParams(this);
+            this.creatures.push(creature);
         }
         
         // Create initial food scattered around
