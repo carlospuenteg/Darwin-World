@@ -47,6 +47,7 @@ function updateStats() {
     const avgTraits = world.getAverageTraits();
     document.getElementById('avgSize').textContent = avgTraits.size.toFixed(2);
     document.getElementById('avgSpeed').textContent = avgTraits.speed.toFixed(2);
+    document.getElementById('avgAppetite').textContent = avgTraits.appetite.toFixed(2);
 }
 
 // Control functions

@@ -9,13 +9,15 @@ class Creature {
         if (genes) {
             this.genes = { 
                 size: parseFloat(genes.size.toFixed(2)),
-                speed: parseFloat(genes.speed.toFixed(2))
+                speed: parseFloat(genes.speed.toFixed(2)),
+                appetite: parseFloat(genes.appetite.toFixed(2))
             };
             this.hasMutation = genes.hasMutation || false;
         } else {
             this.genes = {
-                size: 1.00,  // Default starting size is 1.00
-                speed: 1.00  // Default starting speed is 1.00
+                size: 1.00,     // Default starting size is 1.00
+                speed: 1.00,    // Default starting speed is 1.00
+                appetite: 0.50  // Default starting appetite is 0.50 (balanced)
             };
             this.hasMutation = false;
         }
@@ -59,7 +61,7 @@ class Creature {
     
     update(world) {
         this.age++;
-        this.energy = parseFloat((this.energy - (this.genes.speed * this.genes.size / 60)).toFixed(2)); // Energy consumption: 1 energy/second * speed * size (60fps)
+        this.energy = parseFloat((this.energy - (this.genes.speed * this.genes.size / 60)).toFixed(2)); // Energy consumption: 1 * speed * size energy/second (60fps)
         this.reproductionCooldown = Math.max(0, this.reproductionCooldown - 1);
         
         // Die if too old or no energy
@@ -79,11 +81,11 @@ class Creature {
     }
     
     behave(world) {
-        // Simple two-state behavior based on energy level
+        // Decision making based on appetite gene and distances
         if (this.energy <= this.maxEnergy * 0.5) {
-            // Seek food when energy is half or less
+            // Must seek food when energy is half or less (survival override)
             this.state = 'seeking_food';
-            const nearbyFood = world.food.filter(f => this.distanceTo(f) < 100);
+            const nearbyFood = world.food.filter(f => this.distanceTo(f) < 200);
             if (nearbyFood.length > 0) {
                 this.target = this.findClosest(nearbyFood);
                 this.moveToward(this.target);
@@ -91,24 +93,39 @@ class Creature {
                 this.wander(); // No food nearby, wander to find some
             }
         } else {
-            // Try to mate when energy is more than half
-            this.state = 'mating';
-            if (this.reproductionCooldown <= 0) {
-                const nearbyCreatures = world.creatures.filter(c => 
-                    c !== this && 
-                    c.energy > c.maxEnergy * 0.5 && 
-                    c.reproductionCooldown <= 0 &&
-                    this.distanceTo(c) < this.radius + c.radius + 20
-                );
-                
-                if (nearbyCreatures.length > 0) {
-                    this.reproduce(nearbyCreatures[0], world);
-                } else {
-                    // No suitable mate nearby, move around to find one
-                    this.wander();
-                }
+            // Decision based on appetite when energy > 50%
+            const closestFood = this.findClosest(world.food);
+            const potentialMates = world.creatures.filter(c => 
+                c !== this && 
+                c.energy > c.maxEnergy * 0.5 && 
+                c.reproductionCooldown <= 0
+            );
+            const closestMate = this.findClosest(potentialMates);
+            
+            let decision = 0;
+            
+            if (closestFood) {
+                const foodDistance = this.distanceTo(closestFood);
+                const normalizedFoodDistance = foodDistance / Math.sqrt(world.width * world.width + world.height * world.height);
+                decision += normalizedFoodDistance * this.genes.appetite;
+            }
+            
+            if (closestMate) {
+                const mateDistance = this.distanceTo(closestMate);
+                const normalizedMateDistance = mateDistance / Math.sqrt(world.width * world.width + world.height * world.height);
+                decision -= normalizedMateDistance * (1 - this.genes.appetite);
+            }
+            
+            // Negative decision = prefer mating, positive decision = prefer food
+            if (decision < 0 && closestMate && this.reproductionCooldown <= 0 && this.distanceTo(closestMate) < this.radius + closestMate.radius + 20) {
+                this.state = 'mating';
+                this.reproduce(closestMate, world);
+            } else if (closestFood) {
+                this.state = 'seeking_food';
+                this.target = closestFood;
+                this.moveToward(this.target);
             } else {
-                this.wander(); // Reproduction cooldown active
+                this.wander(); // No targets available
             }
         }
     }
@@ -223,12 +240,13 @@ class Creature {
         return {
             size: parseFloat(((this.genes.size + mate.genes.size) / 2).toFixed(2)),
             speed: parseFloat(((this.genes.speed + mate.genes.speed) / 2).toFixed(2)),
+            appetite: parseFloat(((this.genes.appetite + mate.genes.appetite) / 2).toFixed(2)),
             hasMutation: false // Will be set during mutation
         };
     }
     
     mutateGenes(genes) {
-        const mutationRate = 0.1; // 10% chance per trait
+        const mutationRate = 0.1; // 10% chance per gene
         let hasMutated = false;
         
         // Mutate size
@@ -244,6 +262,14 @@ class Creature {
             const mutationFactor = 0.8 + Math.random() * 0.4; // 0.8 to 1.2 multiplier (-20% to +20%)
             genes.speed = parseFloat((genes.speed * mutationFactor).toFixed(2));
             genes.speed = parseFloat(Math.max(0.10, Math.min(10.00, genes.speed)).toFixed(2)); // Keep in 0.10-10.00 range
+            hasMutated = true;
+        }
+        
+        // Mutate appetite
+        if (Math.random() < mutationRate) {
+            const mutationFactor = 0.8 + Math.random() * 0.4; // 0.8 to 1.2 multiplier (-20% to +20%)
+            genes.appetite = parseFloat((genes.appetite * mutationFactor).toFixed(2));
+            genes.appetite = parseFloat(Math.max(0.10, Math.min(1.00, genes.appetite)).toFixed(2)); // Keep in 0.10-1.00 range
             hasMutated = true;
         }
         
@@ -408,7 +434,7 @@ class Creature {
     
     drawTooltip(ctx) {
         const tooltipWidth = 160;
-        const tooltipHeight = 55;
+        const tooltipHeight = 71; // Increased height for appetite field
         
         // Calculate tooltip position, adjusting for canvas boundaries
         let tooltipX = this.x + this.radius + 10;
@@ -466,6 +492,8 @@ class Creature {
         ctx.fillText(`Size: ${this.genes.size.toFixed(2)}`, textX, textY);
         textY += 16;
         ctx.fillText(`Speed: ${this.genes.speed.toFixed(2)}`, textX, textY);
+        textY += 16;
+        ctx.fillText(`Appetite: ${this.genes.appetite.toFixed(2)}`, textX, textY);
         textY += 16;
         ctx.fillText(`Energy: ${this.energy.toFixed(2)}/${this.maxEnergy.toFixed(2)}`, textX, textY);
         

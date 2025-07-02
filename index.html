@@ -183,6 +183,10 @@
                         <span>Avg Speed:</span>
                         <span class="stat-value" id="avgSpeed">0</span>
                     </div>
+                    <div class="stat-item">
+                        <span>Avg Appetite:</span>
+                        <span class="stat-value" id="avgAppetite">0</span>
+                    </div>
                 </div>
                 
                 <div class="control-group">
@@ -218,13 +222,12 @@
                     <h3>ℹ️ Info</h3>
                     <p style="font-size: 0.8em; line-height: 1.4; opacity: 0.8;">
                         • Starts with 20 creatures (half energy)<br>
-                        • No random spawning - when all die, game ends<br>
-                        • Seeks food when energy ≤ 50%<br>
-                        • Mates when energy > 50%<br>
-                        • Offspring = average of parents' traits<br>
-                        • 10% mutation chance per trait (±20%)<br>
+                        • Genes: size, speed, appetite (0.1-10, 0.1-10, 0.1-1.0)<br>
+                        • Max energy = size × 10<br>
+                        • Energy consumption = 1 × speed × size per second<br>
+                        • Decision = distance to food × appetite - distance to partner × (1-appetite)<br>
+                        • 10% mutation chance per gene (±20%)<br>
                         • Mutants are blue for first 2 seconds<br>
-                        • All values have 2 decimal precision<br>
                     </p>
                 </div>
             </div>

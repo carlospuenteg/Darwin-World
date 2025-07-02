@@ -14,7 +14,7 @@ class World {
             totalMutations: 0
         };
         
-        this.foodSpawnRate = 0.6; // Food spawns per frame (doubled from 0.3)
+        this.foodSpawnRate = 1.0; // Food spawns per frame (1 per frame)
         this.maxFood = 50;
     }
     
@@ -98,15 +98,17 @@ class World {
     
     getAverageTraits() {
         if (this.creatures.length === 0) {
-            return { size: 0, speed: 0 };
+            return { size: 0, speed: 0, appetite: 0 };
         }
         
         const totalSize = this.creatures.reduce((acc, creature) => acc + creature.genes.size, 0);
         const totalSpeed = this.creatures.reduce((acc, creature) => acc + creature.genes.speed, 0);
+        const totalAppetite = this.creatures.reduce((acc, creature) => acc + creature.genes.appetite, 0);
         
         return {
             size: totalSize / this.creatures.length,
-            speed: totalSpeed / this.creatures.length
+            speed: totalSpeed / this.creatures.length,
+            appetite: totalAppetite / this.creatures.length
         };
     }
     
