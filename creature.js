@@ -59,8 +59,8 @@ class Creature {
     update(world) {
         this.age++;
         
-        // Frame-rate independent energy consumption: base_consumption * speed * size per second
-        const deltaTime = 1/60; // Assuming 60fps, but this makes it frame-rate independent
+        // Frame-rate independent energy consumption: base_consumption * speed * size per second (constant rate)
+        const deltaTime = 1/60; // Assuming 60fps for frame-rate independence
         const energyLoss = world.baseConsumption * this.genes.speed * this.genes.size * deltaTime;
         this.energy = parseFloat((this.energy - energyLoss).toFixed(2));
         

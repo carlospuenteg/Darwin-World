@@ -13,10 +13,10 @@ class World {
             totalMutations: 0
         };
         
-        this.foodSpawnRate = 1.0; // Food spawns per frame (will be updated from UI)
-        this.maxFood = 50; // Max food (will be updated from UI)
-        this.initialCreatures = 20; // Initial creatures (will be updated from UI)
-        this.baseConsumption = 1.0; // Base energy consumption (will be updated from UI)
+        this.foodSpawnRate = CONFIG.foodSpawnRate; // Food spawns per frame (will be updated from UI)
+        this.maxFood = CONFIG.maxFood; // Max food (will be updated from UI)
+        this.initialCreatures = CONFIG.initialCreatures; // Initial creatures (will be updated from UI)
+        this.baseConsumption = CONFIG.baseConsumption; // Base energy consumption (will be updated from UI)
     }
     
     initialize() {

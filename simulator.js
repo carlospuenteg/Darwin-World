@@ -115,8 +115,17 @@ function applySettings() {
     world.baseConsumption = parseFloat(document.getElementById('baseConsumption').value);
 }
 
+// Load config values into UI inputs
+function loadConfigIntoUI() {
+    document.getElementById('initialCreatures').value = CONFIG.initialCreatures;
+    document.getElementById('foodSpawnRate').value = CONFIG.foodSpawnRate;
+    document.getElementById('maxFood').value = CONFIG.maxFood;
+    document.getElementById('baseConsumption').value = CONFIG.baseConsumption;
+}
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
+    loadConfigIntoUI();
     initializeSimulation();
     setupMouseInteraction();
     updateStats();
