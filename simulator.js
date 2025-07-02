@@ -15,7 +15,7 @@ class Creature {
         }
         
         // Derived properties from genes
-        this.radius = 5 + this.genes.size * 3; // 8-35 pixels (visual size)
+        this.radius = 8 + this.genes.size * 4; // Size 1 = 12px (50% bigger), range 8.4-48 pixels
         this.maxSpeed = 1 / this.genes.size; // Speed is inverse of size
         this.strength = this.genes.size * 50; // Used in combat
         
@@ -25,7 +25,6 @@ class Creature {
         this.age = 0;
         this.maxAge = 1000 + Math.random() * 2000;
         this.reproductionCooldown = 0;
-        this.generation = 1;
         
         // Behavior state
         this.target = null;
@@ -45,7 +44,7 @@ class Creature {
     
     update(world) {
         this.age++;
-        this.energy -= 0.01 * this.genes.size; // Energy consumption scales with size
+        this.energy -= (this.genes.size / 600); // Energy consumption: 1 energy lasts ~10 seconds (600 frames at 60fps)
         this.reproductionCooldown = Math.max(0, this.reproductionCooldown - 1);
         
         // Die if too old or no energy
@@ -136,8 +135,8 @@ class Creature {
         this.x += this.vx;
         this.y += this.vy;
         
-        // Energy cost for movement (scales with size)
-        const movementCost = Math.sqrt(this.vx * this.vx + this.vy * this.vy) * 0.01 * this.genes.size;
+        // Energy cost for movement (scales with size and speed)
+        const movementCost = Math.sqrt(this.vx * this.vx + this.vy * this.vy) * (this.genes.size / 600);
         this.energy -= movementCost;
         
         // Friction
@@ -222,21 +221,16 @@ class Creature {
         const childY = (this.y + mate.y) / 2 + (Math.random() - 0.5) * 50;
         
         const child = new Creature(childX, childY, childGenes);
-        child.generation = Math.max(this.generation, mate.generation) + 1;
         
         world.creatures.push(child);
         world.stats.totalBirths++;
+        world.stats.totalReproductions++;
         
         // Reproduction costs energy (relative to max energy)
         this.energy -= this.maxEnergy * 0.3;
         mate.energy -= mate.maxEnergy * 0.3;
         this.reproductionCooldown = 200;
         mate.reproductionCooldown = 200;
-        
-        // Update generation counter
-        if (child.generation > world.stats.currentGeneration) {
-            world.stats.currentGeneration = child.generation;
-        }
     }
     
     crossoverGenes(mate) {
@@ -247,11 +241,12 @@ class Creature {
     }
     
     mutateGenes(genes) {
-        const mutationRate = 0.1;
-        const mutationStrength = 0.5; // Larger mutations for 0.1-10 range
+        const mutationRate = 0.1; // 10% chance
         
         if (Math.random() < mutationRate) {
-            genes.size += (Math.random() - 0.5) * mutationStrength;
+            // Random change from -50% to +50% of original size
+            const mutationFactor = 1 + (Math.random() - 0.5); // 0.5 to 1.5 multiplier
+            genes.size *= mutationFactor;
             genes.size = Math.max(0.1, Math.min(10, genes.size)); // Keep in 0.1-10 range
         }
     }
@@ -474,9 +469,9 @@ class Creature {
     
     drawTooltip(ctx) {
         const tooltipX = this.x + this.radius + 10;
-        const tooltipY = this.y - 20;
+        const tooltipY = this.y - 15;
         const tooltipWidth = 160;
-        const tooltipHeight = 70;
+        const tooltipHeight = 55;
         
         // Tooltip background
         ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
@@ -495,8 +490,6 @@ class Creature {
         const textX = tooltipX + 8;
         let textY = tooltipY + 18;
         
-        ctx.fillText(`Generation: ${this.generation}`, textX, textY);
-        textY += 16;
         ctx.fillText(`Size: ${this.genes.size.toFixed(1)}`, textX, textY);
         textY += 16;
         ctx.fillText(`Speed: ${this.maxSpeed.toFixed(2)}`, textX, textY);
@@ -586,7 +579,7 @@ class World {
         this.speed = 3;
         
         this.stats = {
-            currentGeneration: 1,
+            totalReproductions: 0,
             totalBirths: 0,
             totalDeaths: 0
         };
@@ -599,7 +592,7 @@ class World {
         this.creatures = [];
         this.food = [];
         this.stats = {
-            currentGeneration: 1,
+            totalReproductions: 0,
             totalBirths: 0,
             totalDeaths: 0
         };
@@ -830,7 +823,7 @@ function updateStats() {
     const avgTraits = world.getAverageTraits();
     
     populationStat.textContent = world.creatures.length;
-    generationStat.textContent = world.stats.currentGeneration;
+    generationStat.textContent = world.stats.totalReproductions;
     avgSizeStat.textContent = avgTraits.size.toFixed(1);
     avgSpeedStat.textContent = avgTraits.speed.toFixed(2);
     avgAggressionStat.textContent = 'N/A'; // No aggression stat for now
