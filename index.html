@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darwin World - Evolution Simulator</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .game-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        #gameCanvas {
+            display: block;
+            background: #2c3e50;
+            border: 3px solid #34495e;
+        }
+        
+        .controls {
+            width: 300px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-group h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+            color: #ecf0f1;
+        }
+        
+        .stats {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #2980b9, #3498db);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #speedSlider {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            cursor: pointer;
+        }
+        
+        .legend {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧬 Darwin World</h1>
+        <p class="subtitle">Watch evolution in action as creatures adapt, fight, and survive</p>
+        
+        <div class="game-container">
+            <div class="canvas-container">
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+            </div>
+            
+            <div class="controls">
+                <div class="stats">
+                    <h3>📊 Population Stats</h3>
+                    <div class="stat-item">
+                        <span>Population:</span>
+                        <span class="stat-value" id="population">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Generation:</span>
+                        <span class="stat-value" id="generation">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Avg Size:</span>
+                        <span class="stat-value" id="avgSize">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Avg Speed:</span>
+                        <span class="stat-value" id="avgSpeed">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Avg Aggression:</span>
+                        <span class="stat-value" id="avgAggression">0</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>🎮 Controls</h3>
+                    <button id="startBtn">Start Simulation</button>
+                    <button id="pauseBtn">Pause</button>
+                    <button id="resetBtn">Reset World</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>⚡ Speed</h3>
+                    <div class="speed-control">
+                        <span>Slow</span>
+                        <input type="range" id="speedSlider" min="1" max="5" value="3">
+                        <span>Fast</span>
+                    </div>
+                </div>
+                
+                <div class="legend">
+                    <h3>🎨 Legend</h3>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e74c3c;"></div>
+                        <span>High Aggression</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f39c12;"></div>
+                        <span>Medium Aggression</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #2ecc71;"></div>
+                        <span>Low Aggression</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3498db;"></div>
+                        <span>Food</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>ℹ️ Info</h3>
+                    <p style="font-size: 0.8em; line-height: 1.4; opacity: 0.8;">
+                        • Larger creatures are stronger<br>
+                        • Faster creatures escape better<br>
+                        • Aggressive creatures fight more<br>
+                        • Traits are inherited with mutations
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="simulator.js"></script>
+</body>
+</html> 
