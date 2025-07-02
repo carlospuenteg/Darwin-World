@@ -35,6 +35,9 @@ class Creature {
         
         // Visual properties
         this.color = this.getColor();
+        
+        // Interaction properties
+        this.isHovered = false;
     }
     
     getColor() {
@@ -283,6 +286,11 @@ class Creature {
         // Add subtle movement animation
         const wiggle = Math.sin(Date.now() * 0.01 + this.x * 0.1) * 0.5;
         
+        // Draw hover tooltip if creature is being hovered
+        if (this.isHovered) {
+            this.drawTooltip(ctx);
+        }
+        
         // Draw creature shadow (3D effect)
         ctx.beginPath();
         ctx.ellipse(this.x + 2, this.y + 3, this.radius * 0.8, this.radius * 0.4, 0, 0, Math.PI * 2);
@@ -529,6 +537,54 @@ class Creature {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
         ctx.fill();
     }
+    
+    drawTooltip(ctx) {
+        const tooltipX = this.x + this.radius + 10;
+        const tooltipY = this.y - 40;
+        const tooltipWidth = 160;
+        const tooltipHeight = 85;
+        
+        // Tooltip background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.strokeStyle = '#3498db';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight, 8);
+        ctx.fill();
+        ctx.stroke();
+        
+        // Tooltip text
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'left';
+        
+        const textX = tooltipX + 8;
+        let textY = tooltipY + 18;
+        
+        ctx.fillText(`Generation: ${this.generation}`, textX, textY);
+        textY += 16;
+        ctx.fillText(`Size: ${(this.genes.size * 100).toFixed(1)}%`, textX, textY);
+        textY += 16;
+        ctx.fillText(`Speed: ${(this.genes.speed * 100).toFixed(1)}%`, textX, textY);
+        textY += 16;
+        ctx.fillText(`Aggression: ${(this.genes.aggression * 100).toFixed(1)}%`, textX, textY);
+        textY += 16;
+        ctx.fillText(`Energy: ${this.energy.toFixed(1)}/${this.maxEnergy}`, textX, textY);
+        
+        // Arrow pointing to creature
+        ctx.beginPath();
+        ctx.moveTo(tooltipX, tooltipY + tooltipHeight / 2);
+        ctx.lineTo(tooltipX - 10, tooltipY + tooltipHeight / 2 - 5);
+        ctx.lineTo(tooltipX - 10, tooltipY + tooltipHeight / 2 + 5);
+        ctx.closePath();
+        ctx.fillStyle = '#3498db';
+        ctx.fill();
+    }
+    
+    isPointInside(x, y) {
+        const distance = Math.sqrt((x - this.x) ** 2 + (y - this.y) ** 2);
+        return distance <= this.radius;
+    }
 }
 
 class Food {
@@ -616,25 +672,15 @@ class World {
             totalDeaths: 0
         };
         
-        // Create initial population in corner groups
-        const corners = [
-            { x: 100, y: 100 },         // Top-left
-            { x: this.width - 100, y: 100 },         // Top-right
-            { x: 100, y: this.height - 100 },       // Bottom-left
-            { x: this.width - 100, y: this.height - 100 }  // Bottom-right
-        ];
-        
-        corners.forEach(corner => {
-            for (let i = 0; i < 4; i++) {
-                // Create 4 creatures per corner with slight randomization
-                const x = corner.x + (Math.random() - 0.5) * 80;
-                const y = corner.y + (Math.random() - 0.5) * 80;
-                this.creatures.push(new Creature(x, y));
-            }
-        });
+        // Create initial population - 10 creatures uniformly distributed
+        for (let i = 0; i < 10; i++) {
+            const x = 50 + Math.random() * (this.width - 100);
+            const y = 50 + Math.random() * (this.height - 100);
+            this.creatures.push(new Creature(x, y));
+        }
         
         // Create initial food scattered around
-        for (let i = 0; i < 40; i++) {
+        for (let i = 0; i < 30; i++) {
             this.spawnFood();
         }
     }
@@ -671,13 +717,11 @@ class World {
             this.spawnFood();
         }
         
-        // If population gets too low, add some random creatures
-        if (this.creatures.length < 3) {
-            for (let i = 0; i < 5; i++) {
-                const x = Math.random() * this.width;
-                const y = Math.random() * this.height;
-                this.creatures.push(new Creature(x, y));
-            }
+        // Ensure minimum population of 5 creatures
+        if (this.creatures.length <= 5) {
+            const x = 50 + Math.random() * (this.width - 100);
+            const y = 50 + Math.random() * (this.height - 100);
+            this.creatures.push(new Creature(x, y));
         }
     }
     
@@ -729,130 +773,30 @@ class World {
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, this.width, this.height);
         
-        // Add environmental elements
-        this.drawEnvironment(ctx);
+        // Add subtle atmospheric effects only
+        this.drawAtmosphere(ctx);
         
         // Draw food
         this.food.forEach(food => food.draw(ctx));
         
         // Draw creatures
         this.creatures.forEach(creature => creature.draw(ctx));
-        
-        // Add atmospheric effects
-        this.drawAtmosphere(ctx);
-    }
-    
-    drawEnvironment(ctx) {
-        // Draw some environmental features like rocks or plants
-        ctx.save();
-        
-        // Static environmental elements (rocks)
-        const rocks = [
-            { x: 200, y: 300, size: 25 },
-            { x: 600, y: 150, size: 20 },
-            { x: 150, y: 500, size: 30 },
-            { x: 650, y: 450, size: 18 },
-            { x: 400, y: 200, size: 22 },
-            { x: 300, y: 550, size: 28 }
-        ];
-        
-        rocks.forEach(rock => {
-            // Rock shadow
-            ctx.beginPath();
-            ctx.ellipse(rock.x + 3, rock.y + 5, rock.size * 0.8, rock.size * 0.4, 0, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-            ctx.fill();
-            
-            // Rock body
-            const rockGradient = ctx.createRadialGradient(
-                rock.x - rock.size * 0.3, rock.y - rock.size * 0.3, 0,
-                rock.x, rock.y, rock.size
-            );
-            rockGradient.addColorStop(0, '#7f8c8d');
-            rockGradient.addColorStop(0.7, '#34495e');
-            rockGradient.addColorStop(1, '#2c3e50');
-            
-            ctx.beginPath();
-            ctx.arc(rock.x, rock.y, rock.size, 0, Math.PI * 2);
-            ctx.fillStyle = rockGradient;
-            ctx.fill();
-            
-            // Rock outline
-            ctx.strokeStyle = '#2c3e50';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        });
-        
-        // Draw some plant-like decorations
-        const plants = [
-            { x: 100, y: 200 },
-            { x: 700, y: 350 },
-            { x: 50, y: 450 },
-            { x: 750, y: 100 },
-            { x: 350, y: 500 }
-        ];
-        
-        plants.forEach(plant => {
-            ctx.strokeStyle = 'rgba(39, 174, 96, 0.6)';
-            ctx.lineWidth = 3;
-            
-            // Draw plant stems
-            for (let i = 0; i < 3; i++) {
-                const stemHeight = 20 + Math.random() * 20;
-                const stemX = plant.x + (i - 1) * 8;
-                
-                ctx.beginPath();
-                ctx.moveTo(stemX, plant.y);
-                ctx.lineTo(stemX + (Math.random() - 0.5) * 10, plant.y - stemHeight);
-                ctx.stroke();
-                
-                // Add leaves
-                ctx.beginPath();
-                ctx.arc(stemX + 3, plant.y - stemHeight * 0.7, 3, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(46, 204, 113, 0.7)';
-                ctx.fill();
-            }
-        });
-        
-        ctx.restore();
     }
     
     drawAtmosphere(ctx) {
-        // Add subtle animated particles for atmosphere
+        // Add subtle animated particles for atmosphere only
         const time = Date.now() * 0.001;
         
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 15; i++) {
             const x = (Math.sin(time + i) * 100 + this.width / 2 + i * 40) % this.width;
             const y = (Math.cos(time * 0.7 + i * 0.5) * 50 + this.height / 2 + i * 30) % this.height;
             const size = Math.sin(time + i) * 1 + 2;
             
             ctx.beginPath();
             ctx.arc(x, y, Math.abs(size), 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(size) * 0.1})`;
+            ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(size) * 0.05})`;
             ctx.fill();
         }
-        
-        // Add corner glow effects
-        const corners = [
-            { x: 0, y: 0 },
-            { x: this.width, y: 0 },
-            { x: 0, y: this.height },
-            { x: this.width, y: this.height }
-        ];
-        
-        corners.forEach(corner => {
-            const glowGradient = ctx.createRadialGradient(corner.x, corner.y, 0, corner.x, corner.y, 150);
-            glowGradient.addColorStop(0, 'rgba(52, 152, 219, 0.1)');
-            glowGradient.addColorStop(1, 'rgba(52, 152, 219, 0)');
-            
-            ctx.fillStyle = glowGradient;
-            ctx.fillRect(
-                corner.x === 0 ? 0 : corner.x - 150,
-                corner.y === 0 ? 0 : corner.y - 150,
-                150,
-                150
-            );
-        });
     }
 }
 
@@ -902,6 +846,37 @@ resetBtn.addEventListener('click', () => {
 
 speedSlider.addEventListener('input', (e) => {
     world.speed = parseInt(e.target.value);
+});
+
+// Mouse interaction for creature tooltips
+canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    // Check if mouse is over any creature
+    let foundHover = false;
+    world.creatures.forEach(creature => {
+        if (creature.isPointInside(mouseX, mouseY)) {
+            creature.isHovered = true;
+            foundHover = true;
+            canvas.style.cursor = 'pointer';
+        } else {
+            creature.isHovered = false;
+        }
+    });
+    
+    if (!foundHover) {
+        canvas.style.cursor = 'default';
+    }
+});
+
+canvas.addEventListener('mouseleave', () => {
+    // Clear all hover states when mouse leaves canvas
+    world.creatures.forEach(creature => {
+        creature.isHovered = false;
+    });
+    canvas.style.cursor = 'default';
 });
 
 function gameLoop() {
