@@ -320,9 +320,13 @@
                 <div class="speed-inputs">
                     <input type="number" id="gameSpeed" min="0" max="10000" step="0.1">
                     <div class="speed-presets">
+                        <button onclick="setSpeed(1)">x1</button>
                         <button onclick="setSpeed(2)">x2</button>
+                        <button onclick="setSpeed(5)">x5</button>
                         <button onclick="setSpeed(10)">x10</button>
                         <button onclick="setSpeed(100)">x100</button>
+                        <button onclick="setSpeed(200)">x200</button>
+                        <button onclick="setSpeed(500)">x500</button>
                         <button onclick="setSpeed(1000)">x1000</button>
                     </div>
                 </div>
@@ -431,11 +435,11 @@
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #f1c40f;"></div>
-                        <span>Normal newborns (2 seconds)</span>
+                        <span>Normal newborns</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #2ecc71;"></div>
-                        <span>Mutant newborns (2 seconds)</span>
+                        <span>Mutant newborns</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #3498db;"></div>

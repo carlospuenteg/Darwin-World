@@ -2,57 +2,55 @@
 
 An interactive evolution simulator where digital creatures evolve, reproduce, and adapt through natural selection using a sophisticated three-gene system and intelligent decision-making algorithms.
 
-## ✨ Features
+## ✨ Current Features
 
 ### 🧬 **Advanced Genetics System**
-- **Three Core Genes**: Size, Speed, and Appetite (all with 2 decimal precision)
+- **Three Core Genes**: Size (0.10-10.00), Speed (0.10-10.00), and Appetite (0.10-1.00)
 - **Realistic Inheritance**: Offspring inherit average of parents' traits
-- **Independent Mutations**: 10% chance per gene with ±20% variation
-- **Visual Mutation Indicator**: Mutant newborns appear blue for 2 seconds
+- **Independent Mutations**: 10% chance per genome with ±20% variation per gene
+- **Visual Mutation Indicator**: Mutant newborns appear green for 2 seconds
 
-### 🎯 **Intelligent Decision Making**
-- **Energy-Based Behavior**: Creatures must maintain energy above 50% to reproduce
-- **Appetite-Driven Decisions**: Uses formula: `distance_to_food × appetite - distance_to_partner × (1-appetite)`
-- **Survival Override**: Low energy forces food-seeking behavior
-- **Spatial Awareness**: Decisions based on normalized distances across the world
+### 🎯 **Three-Tier Decision Making**
+- **Energy ≤30%**: Must seek food (survival mode)
+- **Energy ≥70%**: Must reproduce (reproduction mode)
+- **Energy 30-70%**: Decision based on appetite using formula: `distance_to_food × appetite - distance_to_partner × (1/appetite)`
 
-### ⚙️ **Configurable Environment**
-- **Population Control**: Adjustable initial creature count (1-100)
-- **Food Dynamics**: Configurable spawn rate (0.1-5.0 per frame) and maximum food (10-200)
-- **Real-time Settings**: Food parameters can be adjusted during simulation
-- **No Random Spawning**: True survival simulation - when all creatures die, it's over
+### 📈 **Real-Time Evolution Graph**
+- **Live Gene Tracking**: Shows evolution of Size, Speed, and Appetite over time
+- **Current Values**: Displays latest values at line endpoints with anti-overlap system
+- **Min/Max Statistics**: Shows historical ranges for each gene
+- **Full Simulation History**: Tracks complete evolutionary timeline
 
-### 📊 **Comprehensive Statistics**
-- **Population Tracking**: Live counts of creatures, food, births, deaths
-- **Genetic Monitoring**: Average traits with color-coded gene values
-- **Mutation Tracking**: Count of total mutations throughout simulation
-- **Visual Feedback**: Hover tooltips show detailed creature information
+### ⚙️ **Comprehensive Configuration**
+- **Population Control**: Initial creatures (0-100)
+- **Food System**: Spawn rate (0-5.0), Initial food (0-500), no maximum limit
+- **Energy System**: Base consumption (0-10), Base energy multiplier (1-100)
+- **Creature Scaling**: Visual size multiplier (0-10), Speed multiplier (0-10)
+- **Simulation Speed**: Variable speed (0-10000x) with preset buttons (x1, x2, x5, x10, x100, x200, x500, x1000)
 
-### 🎨 **Enhanced Visuals**
-- **Smart Tooltips**: Auto-repositioning tooltips that work when paused
-- **Gene Highlighting**: Orange-colored gene values for easy identification
-- **Creature States**: Visual indicators for newborns, mutants, and adults
-- **Atmospheric Effects**: Subtle background animations
+### 🎨 **Enhanced User Interface**
+- **Prominent Speed Control**: Easy access to simulation speed with preset buttons
+- **Organized Layout**: Graph and stats prominently displayed, settings at bottom
+- **Smart Tooltips**: Show creature details with gene information
+- **Responsive Design**: Optimized for larger screens with better space utilization
 
 ## 🔬 Genetic System Details
 
-### **Genes and Formulas:**
-- **Size (0.10-10.00)**: Determines creature radius and affects energy systems
-- **Speed (0.10-10.00)**: Controls movement speed and energy consumption
-- **Appetite (0.10-1.00)**: Balances preference between food-seeking and mating
+### **Gene Functions:**
+- **Size**: Affects visual scale, energy capacity (`Max Energy = Size × Base Energy`), and movement speed
+- **Speed**: Controls movement rate (`Actual Speed = Creature Speed × Speed × (1/Size)`)
+- **Appetite**: Determines food vs. mating preference (1.0 = pure food focus, 0.1 = mating focus)
 
-### **Derived Properties:**
-- **Max Energy**: `Size × 10`
-- **Energy Consumption**: `1 × Speed × Size` per second
-- **Movement Speed**: Directly determined by Speed gene
+### **Energy System:**
+- **Energy Consumption**: `Base Consumption × Speed × Size` per second (frame-rate independent)
+- **Starting Energy**: All creatures start with exactly half their maximum energy
+- **Reproduction Cost**: 30% of maximum energy for both parents
 
-### **Decision Algorithm:**
-When energy > 50%, creatures calculate:
-```
-Decision = (normalized_distance_to_food × appetite) - (normalized_distance_to_mate × (1-appetite))
-```
-- **Negative result**: Prefer mating
-- **Positive result**: Prefer food seeking
+### **Mutation System:**
+- **10% chance per genome** (not per individual gene)
+- **±20% variation** when mutation occurs
+- **Gene-specific ranges**: Size/Speed (0.10-10.00), Appetite (0.10-1.00)
+- **Visual feedback**: Green newborns indicate mutations
 
 ## 🎮 Getting Started
 
@@ -67,37 +65,45 @@ Decision = (normalized_distance_to_food × appetite) - (normalized_distance_to_m
    - No installation or build process required!
 
 3. **Controls & Settings**:
-   - **Start/Pause/Reset**: Control simulation execution
-   - **Initial Creatures**: Set starting population size (1-100)
-   - **Food Spawn Rate**: Control food generation speed (0.1-5.0)
-   - **Max Food**: Set environmental carrying capacity (10-200)
-   - **Real-time Tooltips**: Hover over creatures for detailed stats
+   - **Play/Pause/Reset**: Control simulation execution
+   - **Simulation Speed**: Use preset buttons (x1-x1000) or custom input
+   - **Environment Settings**: Adjust population, food, energy, and creature parameters
+   - **Real-time Tooltips**: Hover over creatures for detailed information
 
 ## 🎨 Visual Guide
 
 - **🔴 Red Creatures**: Adult creatures
 - **🟡 Yellow Newborns**: Normal offspring (first 2 seconds)
-- **🔵 Blue Newborns**: Mutant offspring (first 2 seconds)
+- **🟢 Green Newborns**: Mutant offspring (first 2 seconds)
 - **🔵 Blue Dots**: Food sources
-- **🟠 Orange Text**: Gene values (Size, Speed, Appetite)
+- **🟠 Orange Values**: Gene statistics in UI
 - **Energy Bars**: Show current/maximum energy levels
 
-## 📈 Evolutionary Observations
+## 📈 Understanding the Evolution Graph
 
-### **Appetite Evolution:**
-- **High Appetite** creatures (≥0.8): Prioritize food, survive better in scarce conditions
-- **Low Appetite** creatures (≤0.3): Prioritize reproduction, thrive when food is abundant
-- **Balanced Appetite** creatures (≈0.5): Adapt well to changing conditions
+The real-time graph shows:
+- **Red Line**: Average Size evolution over time
+- **Blue Line**: Average Speed evolution over time  
+- **Green Line**: Average Appetite evolution over time
+- **Current Values**: Displayed at line endpoints with backgrounds
+- **Min/Max Ranges**: Historical extremes shown below graph
 
-### **Size vs Speed Trade-offs:**
-- **Large creatures**: More energy capacity but higher consumption
-- **Fast creatures**: Better at reaching resources but consume more energy
-- **Optimal combinations**: Emerge based on environmental pressures
+## 🔬 Evolutionary Mechanics
 
-### **Mutation Impact:**
-- **Blue newborns**: Indicate genetic innovations in the population
-- **Genetic diversity**: Mutations prevent evolutionary stagnation
-- **Adaptation speed**: Higher mutation rates lead to faster evolution
+### **Reproduction Requirements:**
+- Both parents must have >50% energy
+- Cooldown period after reproduction
+- Energy cost encourages selective mating
+
+### **Survival Pressures:**
+- Energy depletion leads to death
+- Food scarcity creates competition
+- No random spawning - true survival simulation
+
+### **Behavioral Evolution:**
+- **High Appetite (→1.0)**: Food-focused, better survival in scarcity
+- **Low Appetite (→0.1)**: Mating-focused, rapid population growth
+- **Size vs Speed**: Trade-offs between energy capacity and mobility
 
 ## 🛠 Technical Architecture
 
@@ -105,58 +111,53 @@ Decision = (normalized_distance_to_food × appetite) - (normalized_distance_to_m
 ```
 Darwin-World/
 ├── index.html          # Main interface and styling
+├── config.js          # Default configuration values
 ├── creature.js         # Creature class with genetics and AI
 ├── food.js            # Food resource management  
 ├── world.js           # World simulation and environment
-├── simulator.js       # Main game loop and controls
+├── simulator.js       # Main game loop, controls, and graph
 └── README.md          # This documentation
 ```
 
 ### **Technologies:**
 - **HTML5 Canvas**: Real-time 2D graphics rendering
 - **Vanilla JavaScript**: Simulation engine and genetic algorithms
-- **CSS3**: Modern UI with gradients and responsive design
+- **CSS3**: Modern responsive UI design
 - **Object-Oriented Design**: Modular, maintainable codebase
 
-## 🔬 The Science Behind It
+## 🎯 Educational Applications
 
-This simulator demonstrates key evolutionary concepts:
-
-- **Natural Selection**: Beneficial traits become more common over time
-- **Genetic Inheritance**: Offspring traits are combinations of parent traits
-- **Mutation and Variation**: Random changes drive evolutionary innovation
-- **Trade-offs**: Multiple traits create complex fitness landscapes
-- **Resource Competition**: Limited food creates selection pressure
-- **Behavioral Evolution**: Decision-making strategies evolve over time
+Perfect for demonstrating:
+- **Natural Selection**: Beneficial traits become more common
+- **Genetic Inheritance**: Mathematical trait combination
+- **Mutation Effects**: Random variation driving evolution
+- **Resource Competition**: Environmental selection pressure
+- **Complex Systems**: Emergent behavior from simple rules
+- **Data Visualization**: Real-time evolutionary tracking
 
 ## 📊 What to Observe
 
-Over time, you might notice:
-- **Population adaptation** to current food availability
-- **Appetite specialization** based on environmental conditions
-- **Size-speed optimization** for energy efficiency
-- **Cyclical dynamics** as populations over/under-adapt
-- **Mutation bursts** introducing new genetic combinations
-- **Extinction events** when populations can't adapt fast enough
+Watch for:
+- **Population cycles** based on food availability
+- **Genetic drift** in small populations
+- **Adaptive radiation** when mutations prove beneficial
+- **Trade-off optimization** between competing traits
+- **Extinction events** and recovery patterns
+- **Speed of evolution** at different simulation rates
 
-## 🚀 Educational Applications
+## 🚀 Future Enhancements
 
-Perfect for:
-- **Biology Education**: Demonstrating natural selection and genetics
-- **Computer Science**: Showing emergent behavior and algorithms
-- **Data Science**: Observing statistical patterns in populations
-- **Philosophy**: Exploring complexity from simple rules
-- **Research**: Testing evolutionary hypotheses
+Potential additions:
+- **Additional genes** (metabolism, lifespan, aggression)
+- **Environmental challenges** (seasons, disasters, territories)
+- **Advanced genetics** (dominant/recessive, gene linkage)
+- **Data export** capabilities for analysis
+- **Multi-species** ecosystems
+- **Machine learning** integration
 
 ## 🤝 Contributing
 
-Feel free to contribute! Ideas for enhancement:
-- Additional genes (metabolism, longevity, social behavior)
-- Environmental challenges (seasons, disasters, predators)
-- Advanced genetics (dominant/recessive traits, linkage)
-- Data visualization and export features
-- Machine learning integration
-- Multi-species ecosystems
+Contributions welcome! The codebase is well-organized and documented for easy enhancement.
 
 ## 📜 License
 

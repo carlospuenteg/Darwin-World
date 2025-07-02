@@ -12,6 +12,7 @@ let geneHistory = {
     speed: [],
     appetite: []
 };
+let simulationSteps = 0; // Track simulation steps for graph timing
 
 // Initialize simulation
 function initializeSimulation() {
@@ -28,6 +29,7 @@ function initializeSimulation() {
     
     // Reset gene history
     geneHistory = { size: [], speed: [], appetite: [] };
+    simulationSteps = 0;
     
     // Draw initial state
     world.draw(ctx);
@@ -41,22 +43,32 @@ function gameLoop() {
     const updates = Math.floor(speed);
     const partialUpdate = speed - updates;
     
+    let simulationUpdated = false;
+    
     // Run full updates
     for (let i = 0; i < updates; i++) {
         world.update();
+        simulationSteps++;
+        simulationUpdated = true;
     }
     
     // Run partial update (for fractional speeds)
     if (partialUpdate > 0 && Math.random() < partialUpdate) {
         world.update();
+        simulationSteps++;
+        simulationUpdated = true;
     }
     
     // Draw everything
     world.draw(ctx);
     
-    // Update UI stats and graph
+    // Update UI stats every frame for responsiveness
     updateStats();
-    updateGraph();
+    
+    // Only update graph when simulation actually progressed
+    if (simulationUpdated) {
+        updateGraph();
+    }
     
     // Continue loop if simulation is running
     if (world.running) {
@@ -226,10 +238,10 @@ function updateGraph() {
         
         const minMaxDiv = document.getElementById('geneMinMax');
         minMaxDiv.innerHTML = `
-            <div style="display: flex; justify-content: space-between; margin-top: 5px;">
-                <span style="color: #e74c3c; font-size: 13px;"><strong>Size:</strong> ${sizeMin} - ${sizeMax}</span>
-                <span style="color: #3498db; font-size: 13px;"><strong>Speed:</strong> ${speedMin} - ${speedMax}</span>
-                <span style="color: #2ecc71; font-size: 13px;"><strong>Appetite:</strong> ${appetiteMin} - ${appetiteMax}</span>
+            <div style="display: flex; justify-content: space-between; margin-top: 5px; background: rgba(0,0,0,0.8); padding: 8px; border-radius: 6px;">
+                <span style="color: #e74c3c; font-size: 13px; font-weight: bold;"><strong>Size:</strong> ${sizeMin} - ${sizeMax}</span>
+                <span style="color: #3498db; font-size: 13px; font-weight: bold;"><strong>Speed:</strong> ${speedMin} - ${speedMax}</span>
+                <span style="color: #2ecc71; font-size: 13px; font-weight: bold;"><strong>Appetite:</strong> ${appetiteMin} - ${appetiteMax}</span>
             </div>
         `;
     }
@@ -263,6 +275,7 @@ function resetSimulation() {
     
     // Reset gene history
     geneHistory = { size: [], speed: [], appetite: [] };
+    simulationSteps = 0;
     
     world.initialize();
     world.draw(ctx);
