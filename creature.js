@@ -17,14 +17,14 @@ class Creature {
             this.genes = {
                 size: 1.00,     // Default starting size is 1.00
                 speed: 1.00,    // Default starting speed is 1.00
-                appetite: 0.50  // Default starting appetite is 0.50 (balanced)
+                appetite: 1.00  // Default starting appetite is 1.00 (food-focused)
             };
             this.hasMutation = false;
         }
         
         // Derived properties from genes
         this.radius = parseFloat((8 + this.genes.size * 4).toFixed(2)); // Size 1 = 12px (50% bigger), range 8.4-48 pixels
-        this.maxSpeed = parseFloat(this.genes.speed.toFixed(2)); // Speed trait directly determines movement speed
+        this.maxSpeed = parseFloat((this.genes.speed * (1 / this.genes.size)).toFixed(2)); // Actual speed = speed * (1/size)
         
         // Life properties - energy based on size
         this.maxEnergy = parseFloat((this.genes.size * 10).toFixed(2)); // maximum energy = size * 10
@@ -38,9 +38,6 @@ class Creature {
         // Behavior state
         this.target = null;
         this.state = 'seeking_food'; // seeking_food or mating
-        
-        // Visual properties
-        this.color = this.getColor();
         
         // Interaction properties
         this.isHovered = false;
@@ -81,9 +78,11 @@ class Creature {
     }
     
     behave(world) {
-        // Decision making based on appetite gene and distances
-        if (this.energy <= this.maxEnergy * 0.5) {
-            // Must seek food when energy is half or less (survival override)
+        // Three-tier decision making based on energy levels
+        const energyPercent = this.energy / this.maxEnergy;
+        
+        if (energyPercent <= 0.3) {
+            // Must seek food when energy is 30% or less
             this.state = 'seeking_food';
             const nearbyFood = world.food.filter(f => this.distanceTo(f) < 200);
             if (nearbyFood.length > 0) {
@@ -92,8 +91,30 @@ class Creature {
             } else {
                 this.wander(); // No food nearby, wander to find some
             }
+        } else if (energyPercent >= 0.7) {
+            // Must try to reproduce when energy is 70% or more
+            this.state = 'mating';
+            if (this.reproductionCooldown <= 0) {
+                const potentialMates = world.creatures.filter(c => 
+                    c !== this && 
+                    c.energy > c.maxEnergy * 0.5 && 
+                    c.reproductionCooldown <= 0
+                );
+                const closestMate = this.findClosest(potentialMates);
+                
+                if (closestMate && this.distanceTo(closestMate) < this.radius + closestMate.radius + 20) {
+                    this.reproduce(closestMate, world);
+                } else if (closestMate) {
+                    this.target = closestMate;
+                    this.moveToward(this.target);
+                } else {
+                    this.wander(); // No suitable mate found
+                }
+            } else {
+                this.wander(); // Reproduction cooldown active
+            }
         } else {
-            // Decision based on appetite when energy > 50%
+            // Between 30% and 70% energy - use decision formula
             const closestFood = this.findClosest(world.food);
             const potentialMates = world.creatures.filter(c => 
                 c !== this && 
@@ -113,19 +134,24 @@ class Creature {
             if (closestMate) {
                 const mateDistance = this.distanceTo(closestMate);
                 const normalizedMateDistance = mateDistance / Math.sqrt(world.width * world.width + world.height * world.height);
-                decision -= normalizedMateDistance * (1 - this.genes.appetite);
+                decision -= normalizedMateDistance * (1 / this.genes.appetite);
             }
             
-            // Negative decision = prefer mating, positive decision = prefer food
-            if (decision < 0 && closestMate && this.reproductionCooldown <= 0 && this.distanceTo(closestMate) < this.radius + closestMate.radius + 20) {
-                this.state = 'mating';
-                this.reproduce(closestMate, world);
-            } else if (closestFood) {
+            // Decision <= 0 = seek food, decision > 0 = reproduce
+            if (decision <= 0 && closestFood) {
                 this.state = 'seeking_food';
                 this.target = closestFood;
                 this.moveToward(this.target);
+            } else if (decision > 0 && closestMate && this.reproductionCooldown <= 0) {
+                this.state = 'mating';
+                if (this.distanceTo(closestMate) < this.radius + closestMate.radius + 20) {
+                    this.reproduce(closestMate, world);
+                } else {
+                    this.target = closestMate;
+                    this.moveToward(this.target);
+                }
             } else {
-                this.wander(); // No targets available
+                this.wander(); // No clear decision or targets available
             }
         }
     }
@@ -206,7 +232,7 @@ class Creature {
     }
     
     reproduce(mate, world) {
-        // Both parents need more than half energy
+        // Both parents need more than half energy to reproduce
         if (this.energy <= this.maxEnergy * 0.5 || mate.energy <= mate.maxEnergy * 0.5) return;
         
         // Create offspring with genetic crossover and mutation
@@ -482,19 +508,23 @@ class Creature {
         ctx.shadowOffsetY = 0;
         
         // Tooltip text
-        ctx.fillStyle = '#ffffff';
         ctx.font = '12px Arial';
         ctx.textAlign = 'left';
         
         const textX = tooltipX + 8;
         let textY = tooltipY + 18;
         
+        // Gene values in orange color
+        ctx.fillStyle = '#f39c12';
         ctx.fillText(`Size: ${this.genes.size.toFixed(2)}`, textX, textY);
         textY += 16;
         ctx.fillText(`Speed: ${this.genes.speed.toFixed(2)}`, textX, textY);
         textY += 16;
         ctx.fillText(`Appetite: ${this.genes.appetite.toFixed(2)}`, textX, textY);
         textY += 16;
+        
+        // Energy in white color
+        ctx.fillStyle = '#ffffff';
         ctx.fillText(`Energy: ${this.energy.toFixed(2)}/${this.maxEnergy.toFixed(2)}`, textX, textY);
         
         // Arrow pointing to creature (adjust direction based on tooltip position)

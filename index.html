@@ -136,6 +136,38 @@
             margin-right: 10px;
             border: 2px solid rgba(255,255,255,0.3);
         }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        
+        .setting-item label {
+            color: #ecf0f1;
+        }
+        
+        .setting-item input {
+            width: 60px;
+            padding: 4px;
+            border: none;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-align: center;
+        }
+        
+        .setting-item input:focus {
+            outline: none;
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .gene-value {
+            color: #f39c12 !important;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -177,15 +209,15 @@
                     </div>
                     <div class="stat-item">
                         <span>Avg Size:</span>
-                        <span class="stat-value" id="avgSize">0</span>
+                        <span class="stat-value gene-value" id="avgSize">0</span>
                     </div>
                     <div class="stat-item">
                         <span>Avg Speed:</span>
-                        <span class="stat-value" id="avgSpeed">0</span>
+                        <span class="stat-value gene-value" id="avgSpeed">0</span>
                     </div>
                     <div class="stat-item">
                         <span>Avg Appetite:</span>
-                        <span class="stat-value" id="avgAppetite">0</span>
+                        <span class="stat-value gene-value" id="avgAppetite">0</span>
                     </div>
                 </div>
                 
@@ -194,6 +226,22 @@
                     <button id="startBtn">Start Simulation</button>
                     <button id="pauseBtn">Pause</button>
                     <button id="resetBtn">Reset World</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>⚙️ Settings</h3>
+                    <div class="setting-item">
+                        <label for="initialCreatures">Initial creatures:</label>
+                        <input type="number" id="initialCreatures" min="1" max="100" value="20">
+                    </div>
+                    <div class="setting-item">
+                        <label for="foodSpawnRate">Food spawn rate:</label>
+                        <input type="number" id="foodSpawnRate" min="0.1" max="5" step="0.1" value="1.0">
+                    </div>
+                    <div class="setting-item">
+                        <label for="maxFood">Max food:</label>
+                        <input type="number" id="maxFood" min="10" max="200" value="50">
+                    </div>
                 </div>
                 
 
@@ -221,13 +269,13 @@
                 <div class="control-group">
                     <h3>ℹ️ Info</h3>
                     <p style="font-size: 0.8em; line-height: 1.4; opacity: 0.8;">
-                        • Starts with 20 creatures (half energy)<br>
+                        • Starts with configurable creatures (half energy)<br>
                         • Genes: size, speed, appetite (0.1-10, 0.1-10, 0.1-1.0)<br>
+                        • Actual speed = speed × (1/size)<br>
                         • Max energy = size × 10<br>
-                        • Energy consumption = 1 × speed × size per second<br>
-                        • Decision = distance to food × appetite - distance to partner × (1-appetite)<br>
+                        • Energy ≤30%: seek food, ≥70%: reproduce<br>
+                        • 30-70%: decision = food_dist × appetite - mate_dist × (1/appetite)<br>
                         • 10% mutation chance per gene (±20%)<br>
-                        • Mutants are blue for first 2 seconds<br>
                     </p>
                 </div>
             </div>

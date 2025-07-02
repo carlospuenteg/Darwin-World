@@ -5,7 +5,6 @@ class World {
         this.creatures = [];
         this.food = [];
         this.running = false;
-        this.speed = 3;
         
         this.stats = {
             totalReproductions: 0,
@@ -14,8 +13,9 @@ class World {
             totalMutations: 0
         };
         
-        this.foodSpawnRate = 1.0; // Food spawns per frame (1 per frame)
-        this.maxFood = 50;
+        this.foodSpawnRate = 1.0; // Food spawns per frame (will be updated from UI)
+        this.maxFood = 50; // Max food (will be updated from UI)
+        this.initialCreatures = 20; // Initial creatures (will be updated from UI)
     }
     
     initialize() {
@@ -28,8 +28,8 @@ class World {
             totalMutations: 0
         };
         
-        // Create initial population - 20 creatures uniformly distributed
-        for (let i = 0; i < 20; i++) {
+        // Create initial population - configurable number of creatures uniformly distributed
+        for (let i = 0; i < this.initialCreatures; i++) {
             const x = 50 + Math.random() * (this.width - 100);
             const y = 50 + Math.random() * (this.height - 100);
             this.creatures.push(new Creature(x, y));
@@ -122,29 +122,24 @@ class World {
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, this.width, this.height);
         
-        // Add subtle atmospheric effects only
-        this.drawAtmosphere(ctx);
-        
         // Draw food
         this.food.forEach(food => food.draw(ctx));
         
-        // Draw creatures
-        this.creatures.forEach(creature => creature.draw(ctx));
+        // Draw creatures (without tooltips)
+        this.creatures.forEach(creature => {
+            const wasHovered = creature.isHovered;
+            creature.isHovered = false; // Temporarily disable tooltip
+            creature.draw(ctx);
+            creature.isHovered = wasHovered; // Restore hover state
+        });
+        
+        // Draw tooltips on top of everything
+        this.creatures.forEach(creature => {
+            if (creature.isHovered) {
+                creature.drawTooltip(ctx);
+            }
+        });
     }
     
-    drawAtmosphere(ctx) {
-        // Add subtle animated particles for atmosphere only
-        const time = Date.now() * 0.001;
-        
-        for (let i = 0; i < 15; i++) {
-            const x = (Math.sin(time + i) * 100 + this.width / 2 + i * 40) % this.width;
-            const y = (Math.cos(time * 0.7 + i * 0.5) * 50 + this.height / 2 + i * 30) % this.height;
-            const size = Math.sin(time + i) * 1 + 2;
-            
-            ctx.beginPath();
-            ctx.arc(x, y, Math.abs(size), 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(size) * 0.05})`;
-            ctx.fill();
-        }
-    }
+
 } 

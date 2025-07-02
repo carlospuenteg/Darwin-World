@@ -65,6 +65,12 @@ function pauseSimulation() {
 
 function resetSimulation() {
     pauseSimulation();
+    
+    // Update world settings from UI inputs
+    world.initialCreatures = parseInt(document.getElementById('initialCreatures').value);
+    world.foodSpawnRate = parseFloat(document.getElementById('foodSpawnRate').value);
+    world.maxFood = parseInt(document.getElementById('maxFood').value);
+    
     world.initialize();
     world.draw(ctx);
     updateStats();
@@ -101,6 +107,12 @@ function setupMouseInteraction() {
     });
 }
 
+// Apply settings without resetting
+function applySettings() {
+    world.foodSpawnRate = parseFloat(document.getElementById('foodSpawnRate').value);
+    world.maxFood = parseInt(document.getElementById('maxFood').value);
+}
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     initializeSimulation();
@@ -111,4 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('startBtn').addEventListener('click', startSimulation);
     document.getElementById('pauseBtn').addEventListener('click', pauseSimulation);
     document.getElementById('resetBtn').addEventListener('click', resetSimulation);
+    
+    // Connect settings inputs to apply function
+    document.getElementById('foodSpawnRate').addEventListener('input', applySettings);
+    document.getElementById('maxFood').addEventListener('input', applySettings);
 }); 

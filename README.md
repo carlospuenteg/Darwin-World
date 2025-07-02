@@ -1,30 +1,60 @@
 # 🧬 Darwin World - Evolution Simulator
 
-An interactive evolution simulator that demonstrates natural selection, genetics, and survival of the fittest in real-time. Watch as digital creatures evolve, fight, reproduce, and adapt to their environment!
+An interactive evolution simulator where digital creatures evolve, reproduce, and adapt through natural selection using a sophisticated three-gene system and intelligent decision-making algorithms.
 
-![Darwin World Screenshot](https://via.placeholder.com/800x400/667eea/ffffff?text=Darwin+World+Evolution+Simulator)
+## ✨ Features
 
-## 🌟 Features
+### 🧬 **Advanced Genetics System**
+- **Three Core Genes**: Size, Speed, and Appetite (all with 2 decimal precision)
+- **Realistic Inheritance**: Offspring inherit average of parents' traits
+- **Independent Mutations**: 10% chance per gene with ±20% variation
+- **Visual Mutation Indicator**: Mutant newborns appear blue for 2 seconds
 
-### Genetic System
-- **3 Core Traits**: Size (strength), Speed (movement), and Aggression (fighting tendency)
-- **Inheritance**: Offspring inherit traits from both parents through genetic crossover
-- **Mutations**: Random mutations introduce genetic variation during reproduction
-- **Generational Tracking**: Monitor evolution across generations
+### 🎯 **Intelligent Decision Making**
+- **Energy-Based Behavior**: Creatures must maintain energy above 50% to reproduce
+- **Appetite-Driven Decisions**: Uses formula: `distance_to_food × appetite - distance_to_partner × (1-appetite)`
+- **Survival Override**: Low energy forces food-seeking behavior
+- **Spatial Awareness**: Decisions based on normalized distances across the world
 
-### Creature Behaviors
-- **Survival Mechanics**: Energy management, aging, and natural death
-- **Food Seeking**: Hungry creatures actively search for sustenance
-- **Combat System**: Aggressive creatures fight, with size determining strength
-- **Reproduction**: Well-fed creatures mate and produce genetically diverse offspring
+### ⚙️ **Configurable Environment**
+- **Population Control**: Adjustable initial creature count (1-100)
+- **Food Dynamics**: Configurable spawn rate (0.1-5.0 per frame) and maximum food (10-200)
+- **Real-time Settings**: Food parameters can be adjusted during simulation
+- **No Random Spawning**: True survival simulation - when all creatures die, it's over
 
-### Evolution in Action
-- **Natural Selection**: Successful traits become more common over time
-- **Population Dynamics**: Self-regulating population based on resources and survival
-- **Trait Evolution**: Watch average population traits change over generations
-- **Emergent Behaviors**: Complex behaviors emerge from simple rules
+### 📊 **Comprehensive Statistics**
+- **Population Tracking**: Live counts of creatures, food, births, deaths
+- **Genetic Monitoring**: Average traits with color-coded gene values
+- **Mutation Tracking**: Count of total mutations throughout simulation
+- **Visual Feedback**: Hover tooltips show detailed creature information
 
-## 🎮 How to Play
+### 🎨 **Enhanced Visuals**
+- **Smart Tooltips**: Auto-repositioning tooltips that work when paused
+- **Gene Highlighting**: Orange-colored gene values for easy identification
+- **Creature States**: Visual indicators for newborns, mutants, and adults
+- **Atmospheric Effects**: Subtle background animations
+
+## 🔬 Genetic System Details
+
+### **Genes and Formulas:**
+- **Size (0.10-10.00)**: Determines creature radius and affects energy systems
+- **Speed (0.10-10.00)**: Controls movement speed and energy consumption
+- **Appetite (0.10-1.00)**: Balances preference between food-seeking and mating
+
+### **Derived Properties:**
+- **Max Energy**: `Size × 10`
+- **Energy Consumption**: `1 × Speed × Size` per second
+- **Movement Speed**: Directly determined by Speed gene
+
+### **Decision Algorithm:**
+When energy > 50%, creatures calculate:
+```
+Decision = (normalized_distance_to_food × appetite) - (normalized_distance_to_mate × (1-appetite))
+```
+- **Negative result**: Prefer mating
+- **Positive result**: Prefer food seeking
+
+## 🎮 Getting Started
 
 1. **Clone the repository**:
    ```bash
@@ -36,81 +66,104 @@ An interactive evolution simulator that demonstrates natural selection, genetics
    - Simply open `index.html` in any modern web browser
    - No installation or build process required!
 
-3. **Controls**:
-   - **Start/Pause**: Control the simulation
-   - **Reset**: Start over with a new random population
-   - **Speed Control**: Adjust simulation speed (1x to 5x)
+3. **Controls & Settings**:
+   - **Start/Pause/Reset**: Control simulation execution
+   - **Initial Creatures**: Set starting population size (1-100)
+   - **Food Spawn Rate**: Control food generation speed (0.1-5.0)
+   - **Max Food**: Set environmental carrying capacity (10-200)
+   - **Real-time Tooltips**: Hover over creatures for detailed stats
 
 ## 🎨 Visual Guide
 
-- **🔴 Red Creatures**: High aggression (fighters)
-- **🟠 Orange Creatures**: Medium aggression (balanced)
-- **🟢 Green Creatures**: Low aggression (peaceful)
+- **🔴 Red Creatures**: Adult creatures
+- **🟡 Yellow Newborns**: Normal offspring (first 2 seconds)
+- **🔵 Blue Newborns**: Mutant offspring (first 2 seconds)
 - **🔵 Blue Dots**: Food sources
-- **Energy Bars**: Show creature health/energy levels
-- **Age Indicators**: Small dots showing creature age
+- **🟠 Orange Text**: Gene values (Size, Speed, Appetite)
+- **Energy Bars**: Show current/maximum energy levels
+
+## 📈 Evolutionary Observations
+
+### **Appetite Evolution:**
+- **High Appetite** creatures (≥0.8): Prioritize food, survive better in scarce conditions
+- **Low Appetite** creatures (≤0.3): Prioritize reproduction, thrive when food is abundant
+- **Balanced Appetite** creatures (≈0.5): Adapt well to changing conditions
+
+### **Size vs Speed Trade-offs:**
+- **Large creatures**: More energy capacity but higher consumption
+- **Fast creatures**: Better at reaching resources but consume more energy
+- **Optimal combinations**: Emerge based on environmental pressures
+
+### **Mutation Impact:**
+- **Blue newborns**: Indicate genetic innovations in the population
+- **Genetic diversity**: Mutations prevent evolutionary stagnation
+- **Adaptation speed**: Higher mutation rates lead to faster evolution
+
+## 🛠 Technical Architecture
+
+### **File Structure:**
+```
+Darwin-World/
+├── index.html          # Main interface and styling
+├── creature.js         # Creature class with genetics and AI
+├── food.js            # Food resource management  
+├── world.js           # World simulation and environment
+├── simulator.js       # Main game loop and controls
+└── README.md          # This documentation
+```
+
+### **Technologies:**
+- **HTML5 Canvas**: Real-time 2D graphics rendering
+- **Vanilla JavaScript**: Simulation engine and genetic algorithms
+- **CSS3**: Modern UI with gradients and responsive design
+- **Object-Oriented Design**: Modular, maintainable codebase
 
 ## 🔬 The Science Behind It
 
 This simulator demonstrates key evolutionary concepts:
 
-- **Fitness Landscapes**: Different trait combinations have different survival rates
-- **Genetic Drift**: Random mutations create population diversity
-- **Selection Pressure**: Limited resources and combat create survival challenges
-- **Inheritance Patterns**: Successful traits are passed to offspring
-- **Population Bottlenecks**: Low population events can dramatically affect gene pools
+- **Natural Selection**: Beneficial traits become more common over time
+- **Genetic Inheritance**: Offspring traits are combinations of parent traits
+- **Mutation and Variation**: Random changes drive evolutionary innovation
+- **Trade-offs**: Multiple traits create complex fitness landscapes
+- **Resource Competition**: Limited food creates selection pressure
+- **Behavioral Evolution**: Decision-making strategies evolve over time
 
 ## 📊 What to Observe
 
 Over time, you might notice:
-- Population becoming more aggressive in competitive environments
-- Size increases when strength provides survival advantage
-- Speed evolution when escape becomes important
-- Cyclical population dynamics
-- Trait specialization in different conditions
+- **Population adaptation** to current food availability
+- **Appetite specialization** based on environmental conditions
+- **Size-speed optimization** for energy efficiency
+- **Cyclical dynamics** as populations over/under-adapt
+- **Mutation bursts** introducing new genetic combinations
+- **Extinction events** when populations can't adapt fast enough
 
-## 🛠 Technical Details
+## 🚀 Educational Applications
 
-- **Language**: Pure JavaScript (ES6+)
-- **Graphics**: HTML5 Canvas
-- **Architecture**: Object-oriented design with Creature and World classes
-- **Performance**: Optimized for real-time simulation of 50+ creatures
-- **Compatibility**: Works in all modern browsers
-
-## 🚀 Future Enhancements
-
-Potential additions:
-- Environmental challenges (temperature, disasters)
-- More complex genetics (recessive/dominant traits)
-- Predator-prey relationships
-- Territory and group behaviors
-- Data export for analysis
-- 3D visualization
+Perfect for:
+- **Biology Education**: Demonstrating natural selection and genetics
+- **Computer Science**: Showing emergent behavior and algorithms
+- **Data Science**: Observing statistical patterns in populations
+- **Philosophy**: Exploring complexity from simple rules
+- **Research**: Testing evolutionary hypotheses
 
 ## 🤝 Contributing
 
-Feel free to contribute! Some ideas:
-- Add new traits or behaviors
-- Improve the UI/UX
-- Optimize performance
-- Add data visualization features
-- Create different environment types
+Feel free to contribute! Ideas for enhancement:
+- Additional genes (metabolism, longevity, social behavior)
+- Environmental challenges (seasons, disasters, predators)
+- Advanced genetics (dominant/recessive traits, linkage)
+- Data visualization and export features
+- Machine learning integration
+- Multi-species ecosystems
 
 ## 📜 License
 
 This project is open source and available under the [MIT License](LICENSE).
 
-## 🎯 Educational Use
-
-Perfect for:
-- Biology and evolution education
-- Computer science demonstrations
-- Understanding emergent systems
-- Exploring genetic algorithms
-- Science fair projects
-
 ---
 
 **Created with ❤️ by [Carlos Puente](https://github.com/carlospuenteg)**
 
-*Inspired by the wonders of natural selection and the beauty of emergent complexity.* 
+*Experience evolution in action as digital life adapts, survives, and thrives through the power of natural selection.* 
