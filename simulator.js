@@ -306,6 +306,8 @@ function resetSimulation() {
     world.creatureSpeed = parseFloat(document.getElementById('creatureSpeed').value);
     world.creatureSize = parseFloat(document.getElementById('creatureSize').value);
     world.baseEnergy = parseFloat(document.getElementById('baseEnergy').value);
+    world.mutationRate = parseFloat(document.getElementById('mutationRate').value);
+    world.mutationStrength = parseFloat(document.getElementById('mutationStrength').value);
     
     // Reset gene history
     geneHistory = [];
@@ -358,6 +360,8 @@ function applySettings() {
     world.creatureSpeed = parseFloat(document.getElementById('creatureSpeed').value);
     world.creatureSize = parseFloat(document.getElementById('creatureSize').value);
     world.baseEnergy = parseFloat(document.getElementById('baseEnergy').value);
+    world.mutationRate = parseFloat(document.getElementById('mutationRate').value);
+    world.mutationStrength = parseFloat(document.getElementById('mutationStrength').value);
     
     // Update all existing creatures with new world parameters
     world.creatures.forEach(creature => creature.setWorldParams(world));
@@ -374,6 +378,8 @@ function loadConfigIntoUI() {
     document.getElementById('creatureSpeed').value = CONFIG.creatureSpeed;
     document.getElementById('creatureSize').value = CONFIG.creatureSize;
     document.getElementById('baseEnergy').value = CONFIG.baseEnergy;
+    document.getElementById('mutationRate').value = CONFIG.mutationRate;
+    document.getElementById('mutationStrength').value = CONFIG.mutationStrength;
 }
 
 // Set speed from preset buttons
@@ -403,4 +409,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('creatureSpeed').addEventListener('input', applySettings);
     document.getElementById('creatureSize').addEventListener('input', applySettings);
     document.getElementById('baseEnergy').addEventListener('input', applySettings);
+    document.getElementById('mutationRate').addEventListener('input', applySettings);
+    document.getElementById('mutationStrength').addEventListener('input', applySettings);
 }); 

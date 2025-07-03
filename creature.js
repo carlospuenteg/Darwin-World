@@ -255,7 +255,7 @@ class Creature {
         
         // Create offspring with genetic crossover and mutation
         const childGenes = this.crossoverGenes(mate);
-        this.mutateGenes(childGenes);
+        this.mutateGenes(childGenes, world);
         
         // Place child right next to parents
         const childX = (this.x + mate.x) / 2 + (Math.random() - 0.5) * 20;
@@ -290,13 +290,18 @@ class Creature {
         };
     }
     
-    mutateGenes(genes) {
-        const mutationRate = 0.1; // 10% chance per gene
+    mutateGenes(genes, world) {
+        const mutationRate = world.mutationRate / 100; // Convert percentage to decimal
+        const mutationStrength = world.mutationStrength / 100; // Convert percentage to decimal
         let hasMutated = false;
+        
+        // Calculate mutation factor range based on strength
+        const minFactor = 1 - mutationStrength; // e.g., 1 - 0.2 = 0.8
+        const maxFactor = 1 + mutationStrength; // e.g., 1 + 0.2 = 1.2
         
         // Mutate size
         if (Math.random() < mutationRate) {
-            const mutationFactor = 0.8 + Math.random() * 0.4; // 0.8 to 1.2 multiplier (-20% to +20%)
+            const mutationFactor = minFactor + Math.random() * (maxFactor - minFactor);
             genes.size = parseFloat((genes.size * mutationFactor).toFixed(2));
             genes.size = parseFloat(Math.max(0.10, Math.min(10.00, genes.size)).toFixed(2)); // Keep in 0.10-10.00 range
             hasMutated = true;
@@ -304,7 +309,7 @@ class Creature {
         
         // Mutate speed
         if (Math.random() < mutationRate) {
-            const mutationFactor = 0.8 + Math.random() * 0.4; // 0.8 to 1.2 multiplier (-20% to +20%)
+            const mutationFactor = minFactor + Math.random() * (maxFactor - minFactor);
             genes.speed = parseFloat((genes.speed * mutationFactor).toFixed(2));
             genes.speed = parseFloat(Math.max(0.10, Math.min(10.00, genes.speed)).toFixed(2)); // Keep in 0.10-10.00 range
             hasMutated = true;
@@ -312,7 +317,7 @@ class Creature {
         
         // Mutate appetite
         if (Math.random() < mutationRate) {
-            const mutationFactor = 0.8 + Math.random() * 0.4; // 0.8 to 1.2 multiplier (-20% to +20%)
+            const mutationFactor = minFactor + Math.random() * (maxFactor - minFactor);
             genes.appetite = parseFloat((genes.appetite * mutationFactor).toFixed(2));
             genes.appetite = parseFloat(Math.max(0.10, Math.min(1.00, genes.appetite)).toFixed(2)); // Keep in 0.10-1.00 range
             hasMutated = true;

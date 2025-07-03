@@ -10,5 +10,7 @@ const CONFIG = {
     gameSpeed: 1.0,
     creatureSpeed: 0.5,
     creatureSize: 2.0,
-    baseEnergy: 10.0
+    baseEnergy: 10.0,
+    mutationRate: 10,        // 10% chance per gene to mutate
+    mutationStrength: 20     // ±20% variation when mutation occurs
 }; 

@@ -22,6 +22,8 @@ class World {
         this.creatureSpeed = CONFIG.creatureSpeed; // Creature speed multiplier (will be updated from UI)
         this.creatureSize = CONFIG.creatureSize; // Creature size multiplier (will be updated from UI)
         this.baseEnergy = CONFIG.baseEnergy; // Base energy multiplier (will be updated from UI)
+        this.mutationRate = CONFIG.mutationRate; // Mutation rate percentage (will be updated from UI)
+        this.mutationStrength = CONFIG.mutationStrength; // Mutation strength percentage (will be updated from UI)
     }
     
     initialize() {

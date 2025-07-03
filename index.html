@@ -87,7 +87,8 @@
             display: grid;
             grid-template-columns: 1fr 520px;
             gap: 30px;
-            align-items: flex-start;
+            align-items: stretch;
+            min-height: 680px;
         }
 
         @media (max-width: 1200px) {
@@ -162,6 +163,14 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             border-color: var(--accent-blue);
         }
+
+        .stats-section {
+            margin-bottom: 10px;
+        }
+
+        .stats-section:last-child {
+            margin-bottom: 0;
+        }
         
         .canvas-container {
             background: var(--card-bg);
@@ -176,7 +185,7 @@
             align-items: center;
             position: relative;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            height: 680px;
+            height: 100%;
             padding: 0;
         }
 
@@ -202,6 +211,9 @@
             box-shadow: var(--shadow-lg);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             width: 520px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .controls:hover {
@@ -211,6 +223,9 @@
         
         .control-group {
             margin-bottom: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
         
         .control-group h3 {
@@ -405,6 +420,9 @@
             margin-bottom: 15px;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .graph-container:hover {
@@ -597,11 +615,17 @@
         .legend-below-canvas {
             background: rgba(0, 0, 0, 0.3);
             border-top: 1px solid var(--glass-border);
-            padding: 15px 20px;
+            padding: 15px 20px 20px 20px;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
             width: 100%;
             border-radius: 0 0 16px 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 80px;
+            max-height: 120px;
         }
 
         .legend-below-canvas:hover {
@@ -630,29 +654,25 @@
         }
 
         .legend-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            justify-items: center;
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         .legend-item-modern {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 25px;
+            padding: 4px 0;
             font-size: 0.9rem;
             font-weight: 500;
             transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .legend-item-modern:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transform: translateX(4px);
         }
 
         .legend-color-modern {
@@ -841,42 +861,51 @@
 
         <div class="stats-below-canvas">
             <h3>📊 Population Stats</h3>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span>Creatures:</span>
-                    <span class="stat-value" id="creatureCount">0</span>
+            <div class="stats-section">
+                <h4 style="margin: 0 0 15px 0; font-size: 1.1rem; font-weight: 600; color: var(--accent-purple); text-align: center;">General Statistics</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span>Creatures:</span>
+                        <span class="stat-value" id="creatureCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Food:</span>
+                        <span class="stat-value" id="foodCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Births:</span>
+                        <span class="stat-value" id="totalBirths">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Deaths:</span>
+                        <span class="stat-value" id="totalDeaths">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Reproductions:</span>
+                        <span class="stat-value" id="totalReproductions">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Mutations:</span>
+                        <span class="stat-value" id="totalMutations">0</span>
+                    </div>
                 </div>
-                <div class="stat-item">
-                    <span>Food:</span>
-                    <span class="stat-value" id="foodCount">0</span>
-                </div>
-                <div class="stat-item">
-                    <span>Births:</span>
-                    <span class="stat-value" id="totalBirths">0</span>
-                </div>
-                <div class="stat-item">
-                    <span>Deaths:</span>
-                    <span class="stat-value" id="totalDeaths">0</span>
-                </div>
-                <div class="stat-item">
-                    <span>Reproductions:</span>
-                    <span class="stat-value" id="totalReproductions">0</span>
-                </div>
-                <div class="stat-item">
-                    <span>Mutations:</span>
-                    <span class="stat-value" id="totalMutations">0</span>
-                </div>
-                <div class="stat-item">
-                    <span>Avg Size:</span>
-                    <span class="stat-value gene-value" id="avgSize">0</span>
-                </div>
-                <div class="stat-item">
-                    <span>Avg Speed:</span>
-                    <span class="stat-value gene-value" id="avgSpeed">0</span>
-                </div>
-                <div class="stat-item">
-                    <span>Avg Appetite:</span>
-                    <span class="stat-value gene-value" id="avgAppetite">0</span>
+            </div>
+            
+            <div class="stats-section">
+                <h4 style="margin: 20px 0 15px 0; font-size: 1.1rem; font-weight: 600; color: var(--accent-orange); text-align: center;">Average Genes</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span>Avg Size:</span>
+                        <span class="stat-value gene-value" id="avgSize">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Avg Speed:</span>
+                        <span class="stat-value gene-value" id="avgSpeed">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Avg Appetite:</span>
+                        <span class="stat-value gene-value" id="avgAppetite">0</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -908,6 +937,14 @@
                     <div class="setting-item">
                         <label for="baseConsumption">Default consumption:</label>
                         <input type="number" id="baseConsumption" min="0" max="10" step="0.1">
+                    </div>
+                    <div class="setting-item">
+                        <label for="mutationRate">Mutation odds per gene:</label>
+                        <input type="number" id="mutationRate" min="0" max="100" step="1">
+                    </div>
+                    <div class="setting-item">
+                        <label for="mutationStrength">Mutation % per gene:</label>
+                        <input type="number" id="mutationStrength" min="0" step="1">
                     </div>
                 </div>
                 
