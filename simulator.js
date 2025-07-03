@@ -239,13 +239,25 @@ function updateGraph() {
         }
     });
     
-    // Draw legend
-    graphCtx.font = '10px Arial';
+    // Draw legend with backgrounds
+    graphCtx.font = 'bold 11px Arial';
     genes.forEach((gene, index) => {
+        const y = 15 + index * 14;
+        const text = gene.name;
+        const textMetrics = graphCtx.measureText(text);
+        const textWidth = textMetrics.width;
+        
+        // Draw background for legend text
+        graphCtx.fillStyle = 'rgba(0,0,0,0.8)';
+        graphCtx.fillRect(3, y - 10, textWidth + 20, 14);
+        
+        // Draw colored square
         graphCtx.fillStyle = gene.color;
-        const y = 15 + index * 12;
-        graphCtx.fillRect(5, y - 8, 8, 8);
-        graphCtx.fillText(gene.name, 18, y);
+        graphCtx.fillRect(6, y - 6, 10, 10);
+        
+        // Draw text
+        graphCtx.fillStyle = gene.color;
+        graphCtx.fillText(text, 20, y);
     });
     
     // Update min/max display below the graph

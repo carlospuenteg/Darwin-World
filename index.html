@@ -502,6 +502,191 @@
             gap: 30px;
         }
 
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .setting-category {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .setting-category:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .legend-below-canvas {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .legend-below-canvas:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .legend-below-canvas h3 {
+            margin: 0 0 15px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .legend-below-canvas h3::before,
+        .legend-below-canvas h3::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            justify-items: center;
+        }
+
+        .legend-item-modern {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .legend-item-modern:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .legend-color-modern {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .legend-item-modern:hover .legend-color-modern {
+            transform: scale(1.2);
+            box-shadow: 0 0 12px currentColor;
+        }
+
+        .formulas-modern {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .formulas-modern:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .formula-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-blue);
+            transition: all 0.3s ease;
+        }
+
+        .formula-section:hover {
+            background: rgba(0, 0, 0, 0.4);
+            border-left-color: var(--accent-purple);
+            transform: translateX(5px);
+        }
+
+        .formula-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .formula-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--accent-blue);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .formula-title::before {
+            content: '⚡';
+            font-size: 1.2rem;
+        }
+
+        .formula-code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #ecf0f1;
+            margin: 8px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .formula-description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-top: 5px;
+        }
+
+        .decision-tiers {
+            list-style: none;
+            padding: 0;
+            margin: 8px 0 0 0;
+        }
+
+        .decision-tiers li {
+            padding: 4px 0;
+            padding-left: 20px;
+            position: relative;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .decision-tiers li::before {
+            content: '•';
+            color: var(--accent-green);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
         code {
             background: rgba(255,255,255,0.2);
             padding: 2px 6px;
@@ -606,87 +791,115 @@
             </div>
         </div>
 
+        <div class="legend-below-canvas">
+            <h3>🎨 Legend</h3>
+            <div class="legend-grid">
+                <div class="legend-item-modern">
+                    <div class="legend-color-modern" style="background: #e74c3c;"></div>
+                    <span>Adult creatures</span>
+                </div>
+                <div class="legend-item-modern">
+                    <div class="legend-color-modern" style="background: #f1c40f;"></div>
+                    <span>Normal newborns</span>
+                </div>
+                <div class="legend-item-modern">
+                    <div class="legend-color-modern" style="background: #2ecc71;"></div>
+                    <span>Mutant newborns</span>
+                </div>
+                <div class="legend-item-modern">
+                    <div class="legend-color-modern" style="background: #3498db;"></div>
+                    <span>Food</span>
+                </div>
+            </div>
+        </div>
+
         <div class="bottom-section">
-            <div class="bottom-grid">
-                <div class="control-group">
-                    <h3>⚙️ Settings</h3>
+            <div class="settings-grid">
+                <div class="setting-category">
+                    <h3>🎨 Visual</h3>
                     <div class="setting-item">
-                        <label for="initialCreatures">Initial creatures:</label>
+                        <label for="creatureSize">Creature default visual size:</label>
+                        <input type="number" id="creatureSize" min="0" max="10" step="0.1">
+                    </div>
+                </div>
+                
+                <div class="setting-category">
+                    <h3>🧬 Creatures</h3>
+                    <div class="setting-item">
+                        <label for="initialCreatures">Initial individuals:</label>
                         <input type="number" id="initialCreatures" min="0" max="100">
+                    </div>
+                    <div class="setting-item">
+                        <label for="baseEnergy">Default max energy:</label>
+                        <input type="number" id="baseEnergy" min="1" max="100" step="1">
+                    </div>
+                    <div class="setting-item">
+                        <label for="creatureSpeed">Default speed:</label>
+                        <input type="number" id="creatureSpeed" min="0" max="10" step="0.1">
+                    </div>
+                    <div class="setting-item">
+                        <label for="baseConsumption">Default consumption:</label>
+                        <input type="number" id="baseConsumption" min="0" max="10" step="0.1">
+                    </div>
+                </div>
+                
+                <div class="setting-category">
+                    <h3>🍎 Food</h3>
+                    <div class="setting-item">
+                        <label for="initialFood">Initial food:</label>
+                        <input type="number" id="initialFood" min="0" max="500">
                     </div>
                     <div class="setting-item">
                         <label for="foodSpawnRate">Food spawn rate:</label>
                         <input type="number" id="foodSpawnRate" min="0" max="5" step="0.01">
                     </div>
                     <div class="setting-item">
-                        <label for="initialFood">Initial food:</label>
-                        <input type="number" id="initialFood" min="0" max="500">
-                    </div>
-                    <div class="setting-item">
                         <label for="maxFood">Max food:</label>
                         <input type="number" id="maxFood" min="0" max="1000">
                     </div>
-                    <div class="setting-item">
-                        <label for="baseConsumption">Default consumption:</label>
-                        <input type="number" id="baseConsumption" min="0" max="10" step="0.1">
-                    </div>
-                    <div class="setting-item">
-                        <label for="creatureSpeed">Creature default speed:</label>
-                        <input type="number" id="creatureSpeed" min="0" max="10" step="0.1">
-                    </div>
-                    <div class="setting-item">
-                        <label for="creatureSize">Creature default visual size:</label>
-                        <input type="number" id="creatureSize" min="0" max="10" step="0.1">
-                    </div>
-                    <div class="setting-item">
-                        <label for="baseEnergy">Default energy:</label>
-                        <input type="number" id="baseEnergy" min="1" max="100" step="1">
+                </div>
+            </div>
+
+            <div class="formulas-modern">
+                <h3 style="margin-bottom: 20px; text-align: center; font-size: 1.3rem; color: var(--accent-blue);">🧮 Formulas</h3>
+                
+                <div class="formula-section">
+                    <div class="formula-title">Max Energy</div>
+                    <div class="formula-code">size_gene × Default Max Energy</div>
+                    <div class="formula-description">
+                        Maximum energy capacity is proportional to creature size
                     </div>
                 </div>
                 
-                <div class="legend">
-                    <h3>🎨 Legend</h3>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #e74c3c;"></div>
-                        <span>Adult creatures</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #f1c40f;"></div>
-                        <span>Normal newborns</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #2ecc71;"></div>
-                        <span>Mutant newborns</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #3498db;"></div>
-                        <span>Food</span>
+                <div class="formula-section">
+                    <div class="formula-title">Energy Consumption</div>
+                    <div class="formula-code">Default Consumption × speed_gene × size_gene</div>
+                    <div class="formula-description">
+                        Energy drain per second increases with both speed and size
                     </div>
                 </div>
-
-                <div class="control-group">
-                    <h3>🧮 Formulas</h3>
-                    <div style="font-size: 0.8em; line-height: 1.4; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px;">
-                        <p><strong>Max Energy:</strong><br>
-                        <code>size_gene × Default Energy</code></p>
-                        
-                        <p><strong>Energy Consumption:</strong><br>
-                        <code>Default Consumption × speed_gene × size_gene</code></p>
-                        
-                        <p><strong>Actual Speed:</strong><br>
-                        <code>Default Speed × speed_gene × (1/size_gene)</code></p>
-                        
-                        <p><strong>Eat-Reproduce Decision:</strong><br>
-                        <code>if (energy ≤ 30%) seek food<br>
-                        else if (energy ≥ 70%) reproduce<br>
-                        else compare food_drive vs mate_drive</code><br>
-                        <small>food_drive = distance × appetite, mate_drive = distance × (1/appetite)</small></p>
-                        
-                        <p><strong>Decision Tiers:</strong><br>
-                        • Energy ≤30%: Must seek food<br>
-                        • Energy ≥70%: Must reproduce<br>
-                        • Energy 30-70%: Use decision formula</p>
+                
+                <div class="formula-section">
+                    <div class="formula-title">Actual Speed</div>
+                    <div class="formula-code">Default Speed × speed_gene × (1/size_gene)</div>
+                    <div class="formula-description">
+                        Larger creatures move slower despite having speed genes
                     </div>
+                </div>
+                
+                <div class="formula-section">
+                    <div class="formula-title">Behavioral Decision Making</div>
+                    <div class="formula-code">if (energy ≤ 30%) seek food
+else if (energy ≥ 70%) reproduce
+else compare drives</div>
+                    <div class="formula-description">
+                        food_drive = distance × appetite, mate_drive = distance × (1/appetite)
+                    </div>
+                    <ul class="decision-tiers">
+                        <li>Energy ≤30%: Must seek food</li>
+                        <li>Energy ≥70%: Must reproduce</li>
+                        <li>Energy 30-70%: Use decision formula</li>
+                    </ul>
                 </div>
             </div>
         </div>
