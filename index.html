@@ -96,6 +96,77 @@
                 gap: 25px;
             }
         }
+
+        .canvas-and-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .stats-below-canvas {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 30px;
+        }
+
+        .stats-below-canvas:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .stats-below-canvas h3 {
+            margin: 0 0 20px 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-align: center;
+        }
+
+        .stats-below-canvas h3::before,
+        .stats-below-canvas h3::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+        }
+
+        .stats-below-canvas .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            justify-items: center;
+        }
+
+        .stats-below-canvas .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 12px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            min-width: 180px;
+        }
+
+        .stats-below-canvas .stat-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            border-color: var(--accent-blue);
+        }
         
         .canvas-container {
             background: var(--card-bg);
@@ -528,9 +599,9 @@
             border: 1px solid var(--glass-border);
             border-radius: 16px;
             padding: 20px;
-            margin-bottom: 30px;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
+            width: 100%;
         }
 
         .legend-below-canvas:hover {
@@ -732,83 +803,83 @@
         </div>
 
         <div class="game-container">
-            <div class="canvas-container">
-                <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div class="canvas-and-legend">
+                <div class="canvas-container">
+                    <canvas id="gameCanvas" width="800" height="600"></canvas>
+                </div>
+                
+                <div class="legend-below-canvas">
+                    <h3>🎨 Legend</h3>
+                    <div class="legend-grid">
+                        <div class="legend-item-modern">
+                            <div class="legend-color-modern" style="background: #e74c3c;"></div>
+                            <span>Adult creatures</span>
+                        </div>
+                        <div class="legend-item-modern">
+                            <div class="legend-color-modern" style="background: #f1c40f;"></div>
+                            <span>Normal newborns</span>
+                        </div>
+                        <div class="legend-item-modern">
+                            <div class="legend-color-modern" style="background: #2ecc71;"></div>
+                            <span>Mutant newborns</span>
+                        </div>
+                        <div class="legend-item-modern">
+                            <div class="legend-color-modern" style="background: #3498db;"></div>
+                            <span>Food</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="controls">
                 <div class="control-group">
                     <h3>📈 Gene Evolution</h3>
                     <div class="graph-container">
-                        <canvas id="geneGraph" width="410" height="280"></canvas>
+                        <canvas id="geneGraph" width="410" height="600"></canvas>
                         <div id="geneMinMax" style="font-size: 12px; color: #ecf0f1; margin-top: 8px; font-weight: bold;"></div>
                     </div>
                 </div>
-
-                <div class="stats">
-                    <h3>📊 Population Stats</h3>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <span>Creatures:</span>
-                            <span class="stat-value" id="creatureCount">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>Food:</span>
-                            <span class="stat-value" id="foodCount">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>Births:</span>
-                            <span class="stat-value" id="totalBirths">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>Deaths:</span>
-                            <span class="stat-value" id="totalDeaths">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>Reproductions:</span>
-                            <span class="stat-value" id="totalReproductions">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>Mutations:</span>
-                            <span class="stat-value" id="totalMutations">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>Avg Size:</span>
-                            <span class="stat-value gene-value" id="avgSize">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>Avg Speed:</span>
-                            <span class="stat-value gene-value" id="avgSpeed">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>Avg Appetite:</span>
-                            <span class="stat-value gene-value" id="avgAppetite">0</span>
-                        </div>
-                    </div>
-                </div>
-
-
             </div>
         </div>
 
-        <div class="legend-below-canvas">
-            <h3>🎨 Legend</h3>
-            <div class="legend-grid">
-                <div class="legend-item-modern">
-                    <div class="legend-color-modern" style="background: #e74c3c;"></div>
-                    <span>Adult creatures</span>
+        <div class="stats-below-canvas">
+            <h3>📊 Population Stats</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span>Creatures:</span>
+                    <span class="stat-value" id="creatureCount">0</span>
                 </div>
-                <div class="legend-item-modern">
-                    <div class="legend-color-modern" style="background: #f1c40f;"></div>
-                    <span>Normal newborns</span>
+                <div class="stat-item">
+                    <span>Food:</span>
+                    <span class="stat-value" id="foodCount">0</span>
                 </div>
-                <div class="legend-item-modern">
-                    <div class="legend-color-modern" style="background: #2ecc71;"></div>
-                    <span>Mutant newborns</span>
+                <div class="stat-item">
+                    <span>Births:</span>
+                    <span class="stat-value" id="totalBirths">0</span>
                 </div>
-                <div class="legend-item-modern">
-                    <div class="legend-color-modern" style="background: #3498db;"></div>
-                    <span>Food</span>
+                <div class="stat-item">
+                    <span>Deaths:</span>
+                    <span class="stat-value" id="totalDeaths">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Reproductions:</span>
+                    <span class="stat-value" id="totalReproductions">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Mutations:</span>
+                    <span class="stat-value" id="totalMutations">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Avg Size:</span>
+                    <span class="stat-value gene-value" id="avgSize">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Avg Speed:</span>
+                    <span class="stat-value gene-value" id="avgSpeed">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Avg Appetite:</span>
+                    <span class="stat-value gene-value" id="avgAppetite">0</span>
                 </div>
             </div>
         </div>
