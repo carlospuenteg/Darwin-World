@@ -23,7 +23,7 @@ class Creature {
         }
         
         // Derived properties from genes (will be updated with world values in setWorldParams)
-        this.radius = parseFloat((8 + this.genes.size * 4).toFixed(2)); // Size 1 = 12px (50% bigger), range 8.4-48 pixels
+        this.radius = parseFloat((5 + this.genes.size * 4).toFixed(2)); // Size 1 = 9px, range 5.4-45 pixels (changed from 8 to 5)
         this.maxSpeed = parseFloat((this.genes.speed * (1 / this.genes.size)).toFixed(2)); // Actual speed = speed * (1/size)
         
         // Life properties - energy based on size
@@ -46,8 +46,7 @@ class Creature {
     setWorldParams(world) {
         // Update derived properties with world values
         // Visual size only (doesn't affect other calculations) = creature_size * base_visual_size
-        this.radius = parseFloat((8 + (world.creatureSize * this.genes.size) * 4).toFixed(2));
-        
+        this.radius = parseFloat((5 + (world.creatureSize * this.genes.size) * 4).toFixed(2)); // Changed from 8 to 5        
         // Actual speed = creature_speed * speed * (1/size)
         this.maxSpeed = parseFloat((world.creatureSpeed * this.genes.speed * (1 / this.genes.size)).toFixed(2));
         
