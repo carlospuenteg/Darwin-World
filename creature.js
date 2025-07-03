@@ -136,7 +136,7 @@ class Creature {
                 this.wander(); // Reproduction cooldown active
             }
         } else {
-            // Between 30% and 70% energy - use decision formula
+            // Between 30% and 70% energy - use new decision formula
             const closestFood = this.findClosest(world.food);
             const potentialMates = world.creatures.filter(c => 
                 c !== this && 
@@ -145,26 +145,23 @@ class Creature {
             );
             const closestMate = this.findClosest(potentialMates);
             
-            let decision = 0;
+            let food_drive = Infinity;
+            let mate_drive = Infinity;
             
             if (closestFood) {
-                const foodDistance = this.distanceTo(closestFood);
-                const normalizedFoodDistance = foodDistance / Math.sqrt(world.width * world.width + world.height * world.height);
-                decision += normalizedFoodDistance * this.genes.appetite;
+                food_drive = this.distanceTo(closestFood) * this.genes.appetite;
             }
             
             if (closestMate) {
-                const mateDistance = this.distanceTo(closestMate);
-                const normalizedMateDistance = mateDistance / Math.sqrt(world.width * world.width + world.height * world.height);
-                decision -= normalizedMateDistance * (1 / this.genes.appetite);
+                mate_drive = this.distanceTo(closestMate) * (1 / this.genes.appetite);
             }
             
-            // Decision <= 0 = seek food, decision > 0 = reproduce
-            if (decision <= 0 && closestFood) {
+            // Compare drives directly - lower drive value wins (closer distance or stronger preference)
+            if (food_drive <= mate_drive && closestFood) {
                 this.state = 'seeking_food';
                 this.target = closestFood;
                 this.moveToward(this.target);
-            } else if (decision > 0 && closestMate && this.reproductionCooldown <= 0) {
+            } else if (mate_drive < food_drive && closestMate && this.reproductionCooldown <= 0) {
                 this.state = 'mating';
                 if (this.distanceTo(closestMate) < this.radius + closestMate.radius + 20) {
                     this.reproduce(closestMate, world);

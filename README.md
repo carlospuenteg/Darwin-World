@@ -16,33 +16,37 @@ An interactive evolution simulator where digital creatures evolve, reproduce, an
 - **Energy 30-70%**: Decision based on appetite using formula: `distance_to_food × appetite - distance_to_partner × (1/appetite)`
 
 ### 📈 **Real-Time Evolution Graph**
-- **Live Gene Tracking**: Shows evolution of Size, Speed, and Appetite over time
+- **Live Gene Tracking**: Shows evolution of Size, Speed, and Appetite over time with logarithmic scaling
 - **Current Values**: Displays latest values at line endpoints with anti-overlap system
 - **Min/Max Statistics**: Shows historical ranges for each gene
 - **Full Simulation History**: Tracks complete evolutionary timeline
+- **Logarithmic Scale**: Better visualization of gene value changes across different magnitudes
 
 ### ⚙️ **Comprehensive Configuration**
 - **Population Control**: Initial creatures (0-100)
 - **Food System**: Spawn rate (0-5.0), Initial food (0-500), Maximum food limit (0-1000)
-- **Energy System**: Base consumption (0-10), Base energy multiplier (1-100)
-- **Creature Scaling**: Visual size multiplier (0-10), Speed multiplier (0-10)
+- **Energy System**: Default consumption (0-10), Default energy multiplier (1-100)
+- **Creature Scaling**: Default visual size multiplier (0-10), Default speed multiplier (0-10)
 - **Simulation Speed**: Variable speed (0-10000x) with preset buttons (x1, x2, x5, x10, x20, x50, x100, x200, x500, x1000)
 
-### 🎨 **Enhanced User Interface**
-- **Prominent Speed Control**: Easy access to simulation speed with preset buttons
-- **Organized Layout**: Graph and stats prominently displayed, settings at bottom
-- **Smart Tooltips**: Show creature details with gene information
-- **Responsive Design**: Optimized for larger screens with better space utilization
+### 🎨 **Modern Professional Interface (2025)**
+- **Glassmorphism Design**: Beautiful frosted glass effects with modern blur and transparency
+- **Custom CSS Variables**: Consistent color theming with accent gradients
+- **Interactive Elements**: Smooth hover effects, button animations, and micro-interactions
+- **Professional Typography**: Inter font family for enhanced readability
+- **Responsive Grid Layout**: Adaptive design that works perfectly on all screen sizes
+- **Advanced Visual Effects**: Subtle background patterns, gradient borders, and depth shadows
+- **Prominent Speed Control**: Easy access to simulation speed with enhanced preset buttons
 
 ## 🔬 Genetic System Details
 
 ### **Gene Functions:**
-- **Size**: Affects visual scale, energy capacity (`Max Energy = Size × Base Energy`), and movement speed
-- **Speed**: Controls movement rate (`Actual Speed = Creature Speed × Speed × (1/Size)`)
+- **Size**: Affects visual scale, energy capacity (`Max Energy = size_gene × Default Energy`), and movement speed
+- **Speed**: Controls movement rate (`Actual Speed = Default Speed × speed_gene × (1/size_gene)`)
 - **Appetite**: Determines food vs. mating preference (1.0 = pure food focus, 0.1 = mating focus)
 
 ### **Energy System:**
-- **Energy Consumption**: `Base Consumption × Speed × Size` per second (frame-rate independent)
+- **Energy Consumption**: `Default Consumption × speed_gene × size_gene` per second (frame-rate independent)
 - **Starting Energy**: All creatures start with exactly half their maximum energy
 - **Reproduction Cost**: 30% of maximum energy for both parents
 
@@ -55,9 +59,9 @@ An interactive evolution simulator where digital creatures evolve, reproduce, an
 ## 🧮 Core Formulas
 
 ### **Energy & Movement:**
-- **Max Energy**: `Size × Base Energy`
-- **Energy Consumption**: `Base Consumption × Speed × Size` (per second)
-- **Actual Speed**: `Creature Speed × Speed × (1/Size)`
+- **Max Energy**: `size_gene × Default Energy`
+- **Energy Consumption**: `Default Consumption × speed_gene × size_gene` (per second)
+- **Actual Speed**: `Default Speed × speed_gene × (1/size_gene)`
 
 ### **Decision Making Algorithm:**
 **Three-tier system based on energy levels:**
@@ -67,12 +71,22 @@ An interactive evolution simulator where digital creatures evolve, reproduce, an
 
 **Decision Formula:**
 ```
-decision = distance_to_food × appetite - distance_to_partner × (1/appetite)
+if (energy <= 30%) {
+    seek food
+} else if (energy >= 70%) {
+    attempt reproduction
+} else {
+    food_drive = distance_to_food × appetite_gene
+    mate_drive = distance_to_partner × (1/appetite_gene)
+    if (food_drive <= mate_drive) {
+        seek food
+    } else {
+        attempt reproduction
+    }
+}
 ```
-- **Decision ≤ 0**: Seek food
-- **Decision > 0**: Attempt reproduction
 
-This creates intelligent behavior where high appetite (→1.0) favors food-seeking, while low appetite (→0.1) favors reproduction.
+This creates intelligent behavior where high appetite (→1.0) favors food-seeking, while low appetite (→0.1) favors reproduction. The decision compares drive values directly, with lower values indicating stronger preference.
 
 ## 🎮 Getting Started
 

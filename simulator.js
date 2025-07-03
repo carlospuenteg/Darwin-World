@@ -131,9 +131,13 @@ function updateGraph() {
     const speedValues = geneHistory.map(h => h.speed);
     const appetiteValues = geneHistory.map(h => h.appetite);
     const allValues = [...sizeValues, ...speedValues, ...appetiteValues];
-    const minVal = Math.min(...allValues);
+    
+    // Use logarithmic scale - ensure all values are positive by using a minimum of 0.01
+    const minVal = Math.max(0.01, Math.min(...allValues));
     const maxVal = Math.max(...allValues);
-    const range = maxVal - minVal || 1;
+    const logMinVal = Math.log10(minVal);
+    const logMaxVal = Math.log10(maxVal);
+    const logRange = logMaxVal - logMinVal || 1;
     
     // Get simulation step range for X-axis
     const minStep = geneHistory[0].step;
@@ -156,7 +160,9 @@ function updateGraph() {
             // Use simulation step for X position instead of array index
             const currentStep = geneHistory[i].step;
             const x = padding + ((currentStep - minStep) / stepRange) * graphWidth;
-            const normalizedValue = (gene.data[i] - minVal) / range;
+            // Use logarithmic scale for Y position
+            const logValue = Math.log10(Math.max(0.01, gene.data[i]));
+            const normalizedValue = (logValue - logMinVal) / logRange;
             const y = height - padding - (normalizedValue * graphHeight);
             
             if (i === 0) {
@@ -172,7 +178,9 @@ function updateGraph() {
             const lastValue = gene.data[gene.data.length - 1];
             const lastStep = geneHistory[historyLength - 1].step;
             const lastX = padding + ((lastStep - minStep) / stepRange) * graphWidth;
-            const lastNormalizedValue = (lastValue - minVal) / range;
+            // Use logarithmic scale for end point
+            const logLastValue = Math.log10(Math.max(0.01, lastValue));
+            const lastNormalizedValue = (logLastValue - logMinVal) / logRange;
             const lastY = height - padding - (lastNormalizedValue * graphHeight);
             
             // Draw circle at end point
@@ -190,7 +198,9 @@ function updateGraph() {
             const lastValue = gene.data[gene.data.length - 1];
             const lastStep = geneHistory[historyLength - 1].step;
             const lastX = padding + ((lastStep - minStep) / stepRange) * graphWidth;
-            const lastNormalizedValue = (lastValue - minVal) / range;
+            // Use logarithmic scale for value labels
+            const logLastValue = Math.log10(Math.max(0.01, lastValue));
+            const lastNormalizedValue = (logLastValue - logMinVal) / logRange;
             let lastY = height - padding - (lastNormalizedValue * graphHeight);
             
             // Adjust Y position to prevent overlapping

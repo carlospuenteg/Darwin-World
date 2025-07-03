@@ -8,7 +8,7 @@ const CONFIG = {
     maxFood: 200,
     baseConsumption: 1.0,
     gameSpeed: 1.0,
-    creatureSpeed: 1.0,
-    creatureSize: 1.0,
+    creatureSpeed: 0.5,
+    creatureSize: 2.0,
     baseEnergy: 10.0
 }; 
