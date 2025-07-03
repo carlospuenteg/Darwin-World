@@ -301,6 +301,15 @@
             grid-template-columns: 1fr 1fr 1fr;
             gap: 30px;
         }
+
+        code {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #ecf0f1;
+        }
     </style>
 </head>
 <body>
@@ -324,6 +333,8 @@
                         <button onclick="setSpeed(2)">x2</button>
                         <button onclick="setSpeed(5)">x5</button>
                         <button onclick="setSpeed(10)">x10</button>
+                        <button onclick="setSpeed(20)">x20</button>
+                        <button onclick="setSpeed(50)">x50</button>
                         <button onclick="setSpeed(100)">x100</button>
                         <button onclick="setSpeed(200)">x200</button>
                         <button onclick="setSpeed(500)">x500</button>
@@ -410,6 +421,10 @@
                         <input type="number" id="initialFood" min="0" max="500">
                     </div>
                     <div class="setting-item">
+                        <label for="maxFood">Max food:</label>
+                        <input type="number" id="maxFood" min="0" max="1000">
+                    </div>
+                    <div class="setting-item">
                         <label for="baseConsumption">Base consumption:</label>
                         <input type="number" id="baseConsumption" min="0" max="10" step="0.1">
                     </div>
@@ -448,17 +463,25 @@
                 </div>
 
                 <div class="control-group">
-                    <h3>ℹ️ Information</h3>
-                    <div style="font-size: 0.9em; line-height: 1.5;">
-                        <p><strong>Evolution Mechanics:</strong></p>
-                        <p>• Energy ≤30%: Must seek food</p>
-                        <p>• Energy ≥70%: Must reproduce</p>
-                        <p>• Energy 30-70%: Decision based on appetite</p>
-                        <p><strong>Genetics:</strong></p>
-                        <p>• Size: Visual scale & energy capacity</p>
-                        <p>• Speed: Movement rate (÷ by size)</p>
-                        <p>• Appetite: Food vs mating preference</p>
-                        <p>• 10% mutation chance per gene</p>
+                    <h3>🧮 Formulas</h3>
+                    <div style="font-size: 0.8em; line-height: 1.4; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px;">
+                        <p><strong>Max Energy:</strong><br>
+                        <code>Size × Base Energy</code></p>
+                        
+                        <p><strong>Energy Consumption:</strong><br>
+                        <code>Base Consumption × Speed × Size</code></p>
+                        
+                        <p><strong>Actual Speed:</strong><br>
+                        <code>Creature Speed × Speed × (1/Size)</code></p>
+                        
+                        <p><strong>Eat-Reproduce Decision:</strong><br>
+                        <code>distance_to_food × appetite - distance_to_partner × (1/appetite)</code><br>
+                        <small>Decision ≤ 0: seek food, > 0: reproduce</small></p>
+                        
+                        <p><strong>Decision Tiers:</strong><br>
+                        • Energy ≤30%: Must seek food<br>
+                        • Energy ≥70%: Must reproduce<br>
+                        • Energy 30-70%: Use decision formula</p>
                     </div>
                 </div>
             </div>

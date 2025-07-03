@@ -23,10 +23,10 @@ An interactive evolution simulator where digital creatures evolve, reproduce, an
 
 ### ⚙️ **Comprehensive Configuration**
 - **Population Control**: Initial creatures (0-100)
-- **Food System**: Spawn rate (0-5.0), Initial food (0-500), no maximum limit
+- **Food System**: Spawn rate (0-5.0), Initial food (0-500), Maximum food limit (0-1000)
 - **Energy System**: Base consumption (0-10), Base energy multiplier (1-100)
 - **Creature Scaling**: Visual size multiplier (0-10), Speed multiplier (0-10)
-- **Simulation Speed**: Variable speed (0-10000x) with preset buttons (x1, x2, x5, x10, x100, x200, x500, x1000)
+- **Simulation Speed**: Variable speed (0-10000x) with preset buttons (x1, x2, x5, x10, x20, x50, x100, x200, x500, x1000)
 
 ### 🎨 **Enhanced User Interface**
 - **Prominent Speed Control**: Easy access to simulation speed with preset buttons
@@ -52,6 +52,28 @@ An interactive evolution simulator where digital creatures evolve, reproduce, an
 - **Gene-specific ranges**: Size/Speed (0.10-10.00), Appetite (0.10-1.00)
 - **Visual feedback**: Green newborns indicate mutations
 
+## 🧮 Core Formulas
+
+### **Energy & Movement:**
+- **Max Energy**: `Size × Base Energy`
+- **Energy Consumption**: `Base Consumption × Speed × Size` (per second)
+- **Actual Speed**: `Creature Speed × Speed × (1/Size)`
+
+### **Decision Making Algorithm:**
+**Three-tier system based on energy levels:**
+1. **Energy ≤ 30%**: Must seek food (survival mode)
+2. **Energy ≥ 70%**: Must reproduce (reproduction mode)  
+3. **Energy 30-70%**: Decision formula determines behavior
+
+**Decision Formula:**
+```
+decision = distance_to_food × appetite - distance_to_partner × (1/appetite)
+```
+- **Decision ≤ 0**: Seek food
+- **Decision > 0**: Attempt reproduction
+
+This creates intelligent behavior where high appetite (→1.0) favors food-seeking, while low appetite (→0.1) favors reproduction.
+
 ## 🎮 Getting Started
 
 1. **Clone the repository**:
@@ -66,7 +88,7 @@ An interactive evolution simulator where digital creatures evolve, reproduce, an
 
 3. **Controls & Settings**:
    - **Play/Pause/Reset**: Control simulation execution
-   - **Simulation Speed**: Use preset buttons (x1-x1000) or custom input
+   - **Simulation Speed**: Use preset buttons (x1, x2, x5, x10, x20, x50, x100, x200, x500, x1000) or custom input
    - **Environment Settings**: Adjust population, food, energy, and creature parameters
    - **Real-time Tooltips**: Hover over creatures for detailed information
 

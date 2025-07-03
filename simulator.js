@@ -278,6 +278,7 @@ function resetSimulation() {
     world.initialCreatures = parseInt(document.getElementById('initialCreatures').value);
     world.foodSpawnRate = parseFloat(document.getElementById('foodSpawnRate').value);
     world.initialFood = parseInt(document.getElementById('initialFood').value);
+    world.maxFood = parseInt(document.getElementById('maxFood').value);
     world.baseConsumption = parseFloat(document.getElementById('baseConsumption').value);
     world.gameSpeed = parseFloat(document.getElementById('gameSpeed').value);
     world.creatureSpeed = parseFloat(document.getElementById('creatureSpeed').value);
@@ -329,6 +330,7 @@ function setupMouseInteraction() {
 function applySettings() {
     world.foodSpawnRate = parseFloat(document.getElementById('foodSpawnRate').value);
     world.initialFood = parseInt(document.getElementById('initialFood').value);
+    world.maxFood = parseInt(document.getElementById('maxFood').value);
     world.baseConsumption = parseFloat(document.getElementById('baseConsumption').value);
     world.gameSpeed = parseFloat(document.getElementById('gameSpeed').value);
     world.creatureSpeed = parseFloat(document.getElementById('creatureSpeed').value);
@@ -344,6 +346,7 @@ function loadConfigIntoUI() {
     document.getElementById('initialCreatures').value = CONFIG.initialCreatures;
     document.getElementById('foodSpawnRate').value = CONFIG.foodSpawnRate;
     document.getElementById('initialFood').value = CONFIG.initialFood;
+    document.getElementById('maxFood').value = CONFIG.maxFood;
     document.getElementById('baseConsumption').value = CONFIG.baseConsumption;
     document.getElementById('gameSpeed').value = CONFIG.gameSpeed;
     document.getElementById('creatureSpeed').value = CONFIG.creatureSpeed;
@@ -372,6 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Connect settings inputs to apply function
     document.getElementById('foodSpawnRate').addEventListener('input', applySettings);
     document.getElementById('initialFood').addEventListener('input', applySettings);
+    document.getElementById('maxFood').addEventListener('input', applySettings);
     document.getElementById('baseConsumption').addEventListener('input', applySettings);
     document.getElementById('gameSpeed').addEventListener('input', applySettings);
     document.getElementById('creatureSpeed').addEventListener('input', applySettings);
